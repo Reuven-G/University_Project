@@ -1,20 +1,43 @@
 #include <stdio.h>
-#include "assembler.h"
+#include <stdlib.h>
 
-int main(int argc, char *givenFiles[])
+#include "analyzeRow/analyzeRow.h"
+
+/*
+   פונקציית main של האסמבלר.
+   כרגע:
+   - פותחת קובץ קלט
+   - קוראת שורה שורה
+   - שולחת כל שורה ל-analyzeRow
+*/
+int main(int argc, char *argv[])
 {
-    int i;
+    FILE *fp;
+    char line[256];
 
-    if (givenFiles < 2)
+    /* בדיקה שקיבלנו שם קובץ */
+    if (argc != 2)
     {
-        printf("No files were inputed\n");
-        return 0;
+        printf("Error: missing input file name\n");
+        return 1;
     }
 
-    for (i = 1; i < argc; i++)
+    /* פתיחת קובץ האסמבלר */
+    fp = fopen(argv[1], "r");
+    if (fp == NULL)
     {
-        assemble_file(givenFiles[i]);
+        printf("Error: cannot open file %s\n", argv[1]);
+        return 1;
     }
+
+    /* קריאת הקובץ שורה שורה */
+    while (fgets(line, sizeof(line), fp) != NULL)
+    {
+        analyzeRow(line);
+    }
+
+    /* סגירת הקובץ */
+    fclose(fp);
 
     return 0;
 }
