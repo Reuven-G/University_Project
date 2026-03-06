@@ -10,7 +10,8 @@ void analyzeRow(char *line)
 {
     char label[31];
     char command[31];
-
+    
+    int hasLabel = 0;
     int i = 0;
     int j = 0;
 
@@ -33,6 +34,7 @@ void analyzeRow(char *line)
         }
 
         printf("Label: %s\n", label);
+        hasLabel = 1;
         i++;
     }
 
@@ -56,24 +58,24 @@ void analyzeRow(char *line)
         return;
 
     /* check if this is a command */
-    if (isCommandName(word))
+    if (isCommandName(command))
     {
-        printf("Instruction: %s\n", word);
+        printf("Instruction: %s\n", command);
     }
     /* check if it is a directive */
-    else if (isDirectiveName(word))
+    else if (isDirectiveName(command))
     {
         /* make sure there are no extern or entry after the label */
-        if (hasLabel && (strcmp(word, ".extern") == 0 || strcmp(word, ".entry") == 0))
+        if (hasLabel && (strcmp(command, ".extern") == 0 || strcmp(command, ".entry") == 0))
         {
-            printf("Error: label before %s is not allowed\n", word);
+            printf("Error: label before %s is not allowed\n", command);
             return;
         }
-        printf("Directive: %s\n", word);
+        printf("Directive: %s\n", command);
     }
     else
     {
-        printf("Error: unknown command '%s'\n", word);
+        printf("Error: unknown command '%s'\n", command);
     }
 
     printf("Command: %s\n", command);

@@ -7,7 +7,7 @@ typedef enum
     CODE_LABEL,DATA_LABEL,EXTERN_LABEL
 } SymbolType;
 
-/* structure of a node in the symbal table */
+/* structure of a node in the symbol table */
 typedef struct Symbol
 {
     char name[31];          
@@ -27,8 +27,5 @@ void printSymbolTable(void);
 
 /* free memory */
 void freeSymbolTable(void);
-
-/* pointer to the head of the list */
-extern Symbol *head;
 
 #endif

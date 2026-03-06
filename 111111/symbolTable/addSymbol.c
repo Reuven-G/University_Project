@@ -24,7 +24,7 @@ void addSymbol(char *name, int address, SymbolType type)
         exit(1);
     }
 
-    copy the the info to the node */
+    /* copy the the info to the node */
     strcpy(newSymbol->name, name);
     newSymbol->address = address;
     newSymbol->type = type;
