@@ -1,7 +1,7 @@
 #include <stdio.h>
+
 #include "symbolTable.h"
 
-/* print the whole table */
 void printSymbolTable(void)
 {
     Symbol *current = head;

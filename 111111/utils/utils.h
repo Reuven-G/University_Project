@@ -3,8 +3,7 @@
 
 
 int skipWhiteChars(char *line, int i);
-
-int isLetter(char c);
-int isDigit(char c);
+int isEmptyLine(const char *line);
+int isComment(const char *line);
 
 #endif

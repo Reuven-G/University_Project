@@ -1,7 +1,7 @@
 #include <stdlib.h>
+
 #include "symbolTable.h"
 
-/* free the memory of the list */
 void freeSymbolTable(void)
 {
     Symbol *current = head;
