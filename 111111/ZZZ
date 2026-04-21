@@ -1,18 +1,55 @@
-MAIN:  add r3, LIST 
-LOOP:  prn #48 
-  lea STR, r6 
-                 inc r6 
-                 mov r3, K 
-  sub r1, r4 
-  bne END 
-  cmp val1, #-6 
-  bne %END 
-  dec K 
-           jmp %LOOP      
-END:  stop 
-STR:             .string “abcd” 
-LIST:             .data 6, -9 
-                        .data -100 
-.entry  K 
-K:             .data 31 
-.extern  val1 
+./preprocessor.c
+./utils
+./utils/isEmptyLine.c
+./utils/isComment.c
+./utils/utils.h
+./utils/skipWhiteChars.c
+./preprocessor.h
+./symbols
+./analyzeRow
+./analyzeRow/analyzeRow.h
+./analyzeRow/analyzeRow.c
+./main.c
+./getFirstWord.c
+./first_pass
+./first_pass/firstPass.c
+./first_pass/updateIC.c
+./first_pass/firstPass.h
+./first_pass/parseOperands.h
+./first_pass/parseOperands.c
+./first_pass/updateDC.c
+./first_pass/processLine.c
+./addressing
+./addressing/isRegister.c
+./addressing/getAddressingType.c
+./addressing/addressingType.h
+./files
+./symbolTable
+./symbolTable/findSymbol.c
+./symbolTable/symbolTable.h
+./symbolTable/symbolTable.c
+./symbolTable/printSymbolTable.c
+./symbolTable/freeSymbolTable.c
+./symbolTable/addSymbol.c
+./instructions
+./instructions/instructionTable.h
+./instructions/instructionTable.c
+./instructions/findInstruction.c
+./instructions/checkOperands.c
+./directives
+./directives/handleString.c
+./directives/directives.h
+./directives/getdDirectiveType.c
+./directives/handleEntry.c
+./directives/handleExtern.c
+./directives/handleData.c
+./parser
+./second_pass
+./makefile
+./labels
+./labels/isCommandName.c
+./labels/isRegisterName.c
+./labels/labels.h
+./labels/isValidLabel.c
+./labels/isDirectiveName.c
+

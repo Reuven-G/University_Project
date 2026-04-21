@@ -1,33 +1,56 @@
-#include "preprocessor.h"
-#include "utils.h" /* משתמש בפונקציות עזר שלך */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "preprocessor/preprocessor.h"
+#include "first_pass/firstPass.h"
+#include "symbol_table/symbolTable.h"
 
-/* עדכון לפונקציה הקיימת אצלך - הופך אותה למבצעית */
-void process_macros_in_file(FILE *as_file, FILE *am_file) {
-    char line[MAX_LINE_LENGTH];
-    char *temp_line;
-    
-    /* רשימת המאקרואים שכבר התחלת להגדיר ב-H */
-    MacroTable *table = create_macro_table(); 
+/* המונים של הפרויקט - גלובליים כדי שכל הקבצים יראו אותם */
+int IC = 100; /* פקודות מתחילות ב-100 */
+int DC = 0;   /* נתונים מתחילים ב-0 */
 
-    while (fgets(line, MAX_LINE_LENGTH, as_file)) {
-        /* שימוש ב-utils שלך לניקוי רווחים בתחילת שורה */
-        temp_line = skip_spaces(line); 
+/* מערכי הזיכרון של המחשב הדמיוני */
+int codeImage[1200];
+int dataImage[1200];
 
-        if (is_macro_definition(temp_line)) {
-            /* כאן נכנסת הלוגיקה שכבר התחלת לכתוב לשמירת המאקרו */
-            handle_macro_definition(as_file, &table, temp_line);
+int main(int argc, char *argv[]) {
+    int i;
+    FILE *fp;
+
+    if (argc < 2) {
+        printf("Error: missing file name, niga!\n");
+        return 1;
+    }
+
+    for (i = 1; i < argc; i++) {
+        char fileName[256];
+        /* בניית שם הקובץ עם סיומת as */
+        sprintf(fileName, "%s.as", argv[i]);
+
+        printf("--- Starting to work on: %s ---\n", fileName);
+
+        fp = fopen(fileName, "r");
+        if (fp == NULL) {
+            printf("Error: can't open %s, check the path\n", fileName);
             continue;
         }
 
-        /* בדיקה אם השורה היא שם של מאקרו קיים */
-        if (is_macro_in_table(table, temp_line)) {
-            expand_macro(am_file, table, temp_line);
-        } else {
-            /* אם זו שורה רגילה - פשוט מעתיקים לקובץ החדש */
-            fprintf(am_file, "%s", line);
-        }
+        /* שלב 1: מעבר ראשון - סריקת לייבלים וחישוב מרחקים (IC/DC) */
+        runFirstPass(fp);
+
+        /* הדפסה לבדיקה לראות שבאמת הכל נקלט בטבלה */
+        printSymbolTable();
+        
+        printf("\nFinish First Pass. Status: IC=%d, DC=%d\n", IC, DC);
+
+        fclose(fp);
+        /* ניקוי טבלה לפני הקובץ הבא */
+        freeSymbolTable(); 
+        
+        /* איפוס מונים לקובץ הבא */
+        IC = 100;
+        DC = 0;
     }
-    
-    /* שחרור זיכרון כמו שמופיע אצלך ב-struct */
-    free_macro_table(table);
+
+    return 0;
 }
