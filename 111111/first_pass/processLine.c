@@ -1,14 +1,8 @@
-#include <stdio.h>
-
 #include "../analyzeRow/analyzeRow.h"
 
-void updateIC(void);
-void updateDC(void);
-
-void processLine(char *line)
+/* processLine is a thin wrapper kept for structural compatibility.
+   All real logic lives in analyzeRow. */
+int processLine(char *line, int lineNum)
 {
-    analyzeRow(line);
-
-
-    updateIC();
+    return analyzeRow(line, lineNum);
 }

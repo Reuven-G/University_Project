@@ -1,22 +1,9 @@
 #ifndef ANALYZEROW_H
 #define ANALYZEROW_H
 
-#include "../utils/utils.h"
-
-#define MAX_LABEL_SIZE 31
-
-typedef enum { COMMAND_LINE, DATA_LINE, EMPTY_LINE, ERROR_LINE } LineType;
-
-typedef struct {
-    LineType type;
-    int hasLabel;
-    char labelName[MAX_LABEL_SIZE];
-    int isData;           /* 1 עבור הנחיות כמו .data או .string */
-    int lValue;           /* כמה מילים השורה תופסת בזיכרון */
-    int hasError;
-    char errorMsg[100];
-} LineInfo;
-
-LineInfo analyzeRow(char *line);
+/* Analyze one source line during the first pass.
+   IC and DC are updated internally through their module functions.
+   Returns 1 on success, 0 if a (non-fatal) error was found on the line. */
+int analyzeRow(char *line, int lineNum);
 
 #endif

@@ -1,10 +1,24 @@
-#include <stdio.h>
+#include "firstPass.h"
 
 static int DC = 0;
+static int dataImage[MAX_DATA_IMAGE];
 
-void updateDC(void)
+void updateDC(int delta)
 {
-    DC++;
+    DC += delta;
+}
 
-    printf("DC updated: %d\n", DC);
+int getDC(void)
+{
+    return DC;
+}
+
+void resetDC(void)
+{
+    DC = 0;
+}
+
+int *getDataImage(void)
+{
+    return dataImage;
 }

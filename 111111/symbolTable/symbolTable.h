@@ -6,7 +6,8 @@ typedef enum
 {
     CODE_LABEL,
     DATA_LABEL,
-    EXTERN_LABEL
+    EXTERN_LABEL,
+    ENTRY_LABEL
 } SymbolType;
 
 /* structure of a node in the symbol table */
@@ -18,7 +19,7 @@ typedef struct Symbol
     struct Symbol *next;
 } Symbol;
 
-/* head of the lsit */
+/* head of the list */
 extern Symbol *head;
 
 /* add new label to the table */
@@ -27,7 +28,7 @@ void addSymbol(char *name, int address, SymbolType type);
 /* search for a label in the table */
 Symbol *findSymbol(char *name);
 
-/* print for test */
+/* print for debugging */
 void printSymbolTable(void);
 
 /* free memory */

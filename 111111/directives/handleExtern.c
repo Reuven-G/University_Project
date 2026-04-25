@@ -1,7 +1,7 @@
 #include "directives.h"
-#include "../symbol_table/symbol_table.h"
+#include "symbolTable.h"
 
 void handleExtern(char *name)
 {
-    addSymbol(name,0,0,1);
+    addSymbol(name, 0, EXTERN_LABEL);
 }

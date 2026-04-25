@@ -1,10 +1,18 @@
-#include <stdio.h>
+#include "firstPass.h"
 
-static int IC = 100;
+static int IC = IC_START;
 
-void updateIC(void)
+void updateIC(int delta)
 {
-    IC++;
+    IC += delta;
+}
 
-    printf("IC updated: %d\n", IC);
+int getIC(void)
+{
+    return IC;
+}
+
+void resetIC(void)
+{
+    IC = IC_START;
 }
