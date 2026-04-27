@@ -3,12 +3,12 @@
 #include <string.h>
 
 #include "preprocessor.h"
-#include "firstPass.h"
-#include "symbolTable.h"
+#include "first_pass/firstPass.h"
+#include "second_pass/secondPass.h"
+#include "symbolTable/symbolTable.h"
 
 #define MAX_FILENAME 256
 
-/* Build a filename by appending the given extension to the base name */
 static void buildFilename(const char *base, const char *ext, char *out)
 {
     strncpy(out, base, MAX_FILENAME - 5);
@@ -16,7 +16,6 @@ static void buildFilename(const char *base, const char *ext, char *out)
     strcat(out, ext);
 }
 
-/* Process one assembly source file through all three phases */
 static void processFile(const char *baseName)
 {
     char asName[MAX_FILENAME];
@@ -31,14 +30,14 @@ static void processFile(const char *baseName)
     asFile = fopen(asName, "r");
     if (asFile == NULL)
     {
-        fprintf(stderr, "Error: cannot open file '%s'\n", asName);
+        fprintf(stderr, "Error: cannot open '%s'\n", asName);
         return;
     }
 
     amFile = fopen(amName, "w");
     if (amFile == NULL)
     {
-        fprintf(stderr, "Error: cannot create file '%s'\n", amName);
+        fprintf(stderr, "Error: cannot create '%s'\n", amName);
         fclose(asFile);
         return;
     }
@@ -51,7 +50,7 @@ static void processFile(const char *baseName)
     amFile = fopen(amName, "r");
     if (amFile == NULL)
     {
-        fprintf(stderr, "Error: cannot reopen file '%s'\n", amName);
+        fprintf(stderr, "Error: cannot reopen '%s'\n", amName);
         return;
     }
 
@@ -62,8 +61,13 @@ static void processFile(const char *baseName)
     runFirstPass(amFile);
     fclose(amFile);
 
-    /* ── Phase 2: Second pass ── (to be implemented) */
-    /* runSecondPass(baseName); */
+    /* ── Phase 2: Second pass ── */
+    runSecondPass(baseName);
+
+    /* Cleanup for next file */
+    freeSymbolTable();
+    resetIC();
+    resetDC();
 }
 
 int main(int argc, char *argv[])
@@ -73,15 +77,14 @@ int main(int argc, char *argv[])
     if (argc < 2)
     {
         fprintf(stderr, "Usage: assembler <file1> [file2] ...\n");
-        fprintf(stderr, "       (do not include the .as extension)\n");
+        fprintf(stderr, "       (without the .as extension)\n");
         return 1;
     }
 
     for (i = 1; i < argc; i++)
     {
-        printf("Processing: %s\n", argv[i]);
+        printf("--- Processing: %s ---\n", argv[i]);
         processFile(argv[i]);
-        freeSymbolTable();
     }
 
     return 0;
