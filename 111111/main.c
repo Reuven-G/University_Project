@@ -22,6 +22,7 @@ static void processFile(const char *baseName)
     char amName[MAX_FILENAME];
     FILE *asFile;
     FILE *amFile;
+    int   firstPassOk;
 
     buildFilename(baseName, ".as", asName);
     buildFilename(baseName, ".am", amName);
@@ -58,8 +59,19 @@ static void processFile(const char *baseName)
     resetDC();
     freeSymbolTable();
 
-    runFirstPass(amFile);
+    firstPassOk = runFirstPass(amFile);
     fclose(amFile);
+
+    /* Per spec: if errors found, do not generate output files */
+    if (!firstPassOk)
+    {
+        fprintf(stderr, "Skipping second pass for '%s' due to errors.\n",
+                baseName);
+        freeSymbolTable();
+        resetIC();
+        resetDC();
+        return;
+    }
 
     /* ── Phase 2: Second pass ── */
     runSecondPass(baseName);

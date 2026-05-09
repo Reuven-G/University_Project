@@ -123,6 +123,7 @@ static int handleDirectiveLine(int dirType, char *rest,
                                 int lineNum)
 {
     int  *dataImage = getDataImage();
+    int   oldDC;
     int   dc;
 
     switch (dirType)
@@ -139,11 +140,10 @@ static int handleDirectiveLine(int dirType, char *rest,
                 }
                 addSymbol((char *)labelName, getDC(), DATA_LABEL);
             }
-            dc = getDC();
+            oldDC = getDC();
+            dc    = oldDC;
             handleData(rest, &dc, dataImage);
-            /* sync DC back — handleData updates local copy */
-            while (getDC() < dc)
-                updateDC(1);
+            updateDC(dc - oldDC);
             break;
 
         case DIR_STRING:
@@ -158,10 +158,10 @@ static int handleDirectiveLine(int dirType, char *rest,
                 }
                 addSymbol((char *)labelName, getDC(), DATA_LABEL);
             }
-            dc = getDC();
+            oldDC = getDC();
+            dc    = oldDC;
             handleString(rest, &dc, dataImage);
-            while (getDC() < dc)
-                updateDC(1);
+            updateDC(dc - oldDC);
             break;
 
         case DIR_EXTERN:

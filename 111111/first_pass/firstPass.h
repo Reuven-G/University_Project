@@ -10,7 +10,7 @@
 
 /* Run the first pass over the expanded .am file.
    Fills the symbol table and data image, advances IC and DC. */
-void runFirstPass(FILE *fp);
+int runFirstPass(FILE *fp);  /* returns 1=ok, 0=errors found */
 
 /* ── IC / DC counters ─────────────────────────────────── */
 

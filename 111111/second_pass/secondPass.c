@@ -202,6 +202,23 @@ void runSecondPass(const char *baseName)
         fprintf(stderr, "Second pass finished with errors — output not written.\n");
         return;
     }
+	
+	/* Validate all .entry symbols were actually defined in this file */
+	{
+		Symbol *sym = head;
+		while (sym != NULL)
+		{
+			if (sym->type == ENTRY_LABEL && sym->address == 0)
+			{
+				fprintf(stderr,
+					"Error: .entry '%s' was never defined in this file\n",
+					sym->name);
+				hasError = 1;
+			}
+			sym = sym->next;
+		}
+	}
+	if (hasError) return;
 
     /* ── Write output files ── */
     icSize    = codeIndex;

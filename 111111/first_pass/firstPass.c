@@ -23,7 +23,7 @@ static void offsetDataSymbols(void)
     }
 }
 
-void runFirstPass(FILE *fp)
+int runFirstPass(FILE *fp)
 {
     char line[MAX_LINE_LEN];
     int  lineNum  = 0;
@@ -45,5 +45,9 @@ void runFirstPass(FILE *fp)
     offsetDataSymbols();
 
     if (hasError)
+    {
         fprintf(stderr, "First pass finished with errors.\n");
+        return 0;
+    }
+    return 1;
 }
