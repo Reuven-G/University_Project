@@ -1,5 +1,5 @@
 #include "directives.h"
-#include "symbolTable.h"
+#include "../symbolTable/symbolTable.h"
 
 void handleExtern(char *name)
 {

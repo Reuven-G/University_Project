@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "directives.h"
-#include "symbolTable.h"
+#include "../symbolTable/symbolTable.h"
 
 void handleEntry(char *name)
 {

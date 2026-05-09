@@ -1,5 +1,5 @@
 #include "addressingType.h"
-#include "labels.h"
+#include "../labels/labels.h"
 
 int getAddressingType(char *operand)
 {

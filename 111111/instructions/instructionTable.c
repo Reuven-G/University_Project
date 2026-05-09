@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "instructionTable.h"
 
 Instruction instructionTable[] = {

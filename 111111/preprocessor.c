@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "preprocessor.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 /* ── Macro table management ─────────────────────────────── */
 
