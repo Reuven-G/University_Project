@@ -145,7 +145,7 @@ void runSecondPass(const char *baseName)
     char  command[MAX_TOKEN_LEN];
     int   lineNum = 0;
     int   hasError = 0;
-    int   i;
+    int   i = 0;
     int  *dataImage;
     int   dcSize;
     int   icSize;

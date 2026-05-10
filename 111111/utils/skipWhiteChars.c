@@ -1,6 +1,6 @@
 
 
-int skipWhiteChars(char *line, int i)
+int skipWhiteChars(const char *line, int i)
 {
     while (line[i] == ' ' || line[i] == '\t')
     {
