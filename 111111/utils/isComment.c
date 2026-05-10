@@ -1,5 +1,9 @@
 #include "utils.h"
 
-int isComment(const char *line) {
-    return line[0] == ';';
+int isComment(const char *line)
+{
+  while (*line == ' ' || *line == '\t')
+    line++;
+  return *line == ';';
+    
 }

@@ -23,6 +23,35 @@ static void offsetDataSymbols(void)
     }
 }
 
+/* Match any ENTRY_LABEL symbols that were forward-declared
+   against labels that got defined later in the file */
+static void resolveEntryLabels(void)
+{
+    Symbol *ent = head;
+    Symbol *def;
+
+    while (ent != NULL)
+    {
+        if (ent->type == ENTRY_LABEL && ent->address == 0)
+        {
+            /* Search for a real definition of this name */
+            def = head;
+            while (def != NULL)
+            {
+                if (def != ent &&
+                    strcmp(def->name, ent->name) == 0 &&
+                    (def->type == CODE_LABEL || def->type == DATA_LABEL))
+                {
+                    ent->address = def->address;
+                    break;
+                }
+                def = def->next;
+            }
+        }
+        ent = ent->next;
+    }
+}
+
 int runFirstPass(FILE *fp)
 {
     char line[MAX_LINE_LEN];
@@ -43,6 +72,7 @@ int runFirstPass(FILE *fp)
 
     /* Offset all data-segment labels by the final IC */
     offsetDataSymbols();
+    resolveEntryLabels();
 
     if (hasError)
     {

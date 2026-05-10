@@ -6,40 +6,23 @@
 #include "../addressing/addressingType.h"
 #include "../symbolTable/symbolTable.h"
 
-/* Extract register number from "rN" string */
-static int regNum(const char *op)
+/* Register N is encoded as 1<<N (bitmask, not the number itself) */
+static int regMask(const char *op)
 {
-    return op[1] - '0';
+    return 1 << (op[1] - '0');
 }
 
-/* ── IMMEDIATE ── bits 11-2: value (10 bits, 2's complement), bits 1-0: ARE=00 */
 static int encodeImmediate(const char *operand)
 {
-    int value;
-    int word;
-
-    /* skip the '#' */
-    value = atoi(operand + 1);
-
-    /* value occupies bits 11-2 (10 bits) */
-    word = (value & 0x3FF) << 2;
-
-    /* ARE = 00 (Absolute) */
-    word |= ARE_ABSOLUTE;
-
-    return word & 0xFFF;
+    int value = atoi(operand + 1); /* skip '#' */
+    return value & 0xFFF;          /* store directly, no shift */
 }
 
-/* ── DIRECT ── bits 11-2: symbol address (10 bits), bits 1-0: ARE */
 static int encodeDirect(const char *operand,
                          int currentIC,
                          ExtRef *extRefs, int *extCount)
 {
-    Symbol *sym;
-    int     word;
-    int     are;
-
-    sym = findSymbol((char *)operand);
+    Symbol *sym = findSymbol((char *)operand);
 
     if (sym == NULL)
     {
@@ -49,11 +32,6 @@ static int encodeDirect(const char *operand,
 
     if (sym->type == EXTERN_LABEL)
     {
-        /* External: address = 0, ARE = E (2) */
-        word = 0;
-        are  = ARE_EXTERNAL;
-
-        /* Record this reference for the .ext file */
         if (*extCount < 256)
         {
             strncpy(extRefs[*extCount].name, operand, 30);
@@ -61,18 +39,12 @@ static int encodeDirect(const char *operand,
             extRefs[*extCount].address  = currentIC;
             (*extCount)++;
         }
-    }
-    else
-    {
-        /* Internal: address in bits 11-2, ARE = R (1) */
-        word = (sym->address & 0x3FF) << 2;
-        are  = ARE_RELOCATABLE;
+        return 0; /* address=0 for extern, ARE=E shown separately */
     }
 
-    word |= are;
-    return word & 0xFFF;
+    /* Internal: store address directly in 12-bit word */
+    return sym->address & 0xFFF;
 }
-
 /* ── RELATIVE ── operand is "%LABEL"
    bits 11-2: (target_address - current_IC) as signed 10-bit, ARE = R (1) */
 static int encodeRelative(const char *operand, int currentIC)
@@ -105,18 +77,13 @@ static int encodeRelative(const char *operand, int currentIC)
    dst register: bits 2-0
    ARE = 0 (Absolute)
    isSrc=1 → place in bits 5-3, isSrc=0 → place in bits 2-0 */
+
 static int encodeRegister(const char *operand, int isSrc)
 {
-    int reg  = regNum(operand);
-    int word = 0;
-
-    if (isSrc)
-        word = (reg & 0x7) << 3;
-    else
-        word = (reg & 0x7);
-
-    word |= ARE_ABSOLUTE;
+    int word = regMask(operand);
     return word & 0xFFF;
+    /* Note: src and dst single-register words are the same —
+       just the bitmask of the register. ARE=0 (Absolute). */
 }
 
 /* ── Public: register pair ────────────────────────────────────────
@@ -124,10 +91,8 @@ static int encodeRegister(const char *operand, int isSrc)
    src in bits 5-3, dst in bits 2-0, ARE = 0. */
 int encodeRegisterPair(const char *srcOp, const char *dstOp)
 {
-    int word = 0;
-    word |= (regNum(srcOp) & 0x7) << 3;
-    word |= (regNum(dstOp) & 0x7);
-    word |= ARE_ABSOLUTE;
+    /* Both registers in one word: src_mask | dst_mask */
+    int word = regMask(srcOp) | regMask(dstOp);
     return word & 0xFFF;
 }
 
