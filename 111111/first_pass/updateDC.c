@@ -1,5 +1,13 @@
 #include "firstPass.h"
 
+
+
+
+/* the data counter script */
+
+
+
+
 static int DC = 0;
 static int dataImage[MAX_DATA_IMAGE];
 

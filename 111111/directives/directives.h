@@ -7,6 +7,10 @@
 #define DIR_EXTERN 3
 #define DIR_ENTRY 4
 
+
+
+
+/* checks and returns the type of the word */
 int getDirectiveType(char *word);
 
 void handleData(char *line, int *DC, int dataImage[]);

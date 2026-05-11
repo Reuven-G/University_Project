@@ -8,8 +8,14 @@
 
 #define MAX_LINE_LEN 82
 
-/* After the first pass is complete, every DATA_LABEL address must be
-   shifted by the final IC value so data sits after code in memory. */
+/*
+this script is the most center of the whole program.
+*/
+
+
+
+
+/* the func checks the symbol table and add the final IC to every DATA_LABEL type */
 static void offsetDataSymbols(void)
 {
     Symbol *sym = head;
@@ -23,8 +29,10 @@ static void offsetDataSymbols(void)
     }
 }
 
-/* Match any ENTRY_LABEL symbols that were forward-declared
-   against labels that got defined later in the file */
+
+
+
+/* the func search for ENTRY_LABEL symbols that their address is 0 and connects them the their real label */
 static void resolveEntryLabels(void)
 {
     Symbol *ent = head;
@@ -51,25 +59,29 @@ static void resolveEntryLabels(void)
     }
 }
 
+
+
+
+/* that func reads every and analayze it */
 int runFirstPass(FILE *fp)
 {
     char line[MAX_LINE_LEN];
     int  lineNum  = 0;
     int  hasError = 0;
-
+	
+	/* reads every line */
     while (fgets(line, MAX_LINE_LEN, fp) != NULL)
     {
         lineNum++;
 
-        /* Skip blank lines and comment lines */
+        /* skip blanks and comments */
         if (isEmptyLine(line) || isComment(line))
             continue;
-
+		/* analyze the line */
         if (!analyzeRow(line, lineNum))
             hasError = 1;
     }
 
-    /* Offset all data-segment labels by the final IC */
     offsetDataSymbols();
     resolveEntryLabels();
 

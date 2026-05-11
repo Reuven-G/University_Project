@@ -1,6 +1,10 @@
 #include <string.h>
 #include "directives.h"
 
+
+
+
+/* checks and returns the type of the word */
 int getDirectiveType(char *word)
 {
     if(strcmp(word,".data") == 0)

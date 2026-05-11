@@ -6,6 +6,15 @@
 #define RELATIVE  2
 #define REGISTER  3
 
+
+
+
+/* checks the type of the of the operand */
 int getAddressingType(char *operand);
 
+
+
+
+/* the func checks if it is a register */
+int isRegister(char *word)
 #endif

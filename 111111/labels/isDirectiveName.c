@@ -7,7 +7,7 @@ char *directives[] =
     ".data",".string",".entry",".extern",NULL
 };
 
-/* check if given directive is in the list */
+/* check if directive in the list */
 int isDirectiveName(char *name)
 {
     int i = 0;

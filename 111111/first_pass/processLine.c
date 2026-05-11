@@ -1,7 +1,9 @@
 #include "../analyzeRow/analyzeRow.h"
 
-/* processLine is a thin wrapper kept for structural compatibility.
-   All real logic lives in analyzeRow. */
+
+
+
+/* its just for more nice looking code, all the logic is in analyzeRow.c */
 int processLine(char *line, int lineNum)
 {
     return analyzeRow(line, lineNum);

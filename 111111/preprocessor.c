@@ -4,8 +4,16 @@
 #include "preprocessor.h"
 #include "utils/utils.h"
 
-/* ── Macro table management ─────────────────────────────── */
+/*
+	this script checks the .as file.
+	inside it the script finds the MACROS, saves them, translate them
+	and save everything in the .am file
+*/
 
+
+
+
+/* allocatee memory to the main structure that holds the list of the MACROS */
 MacroTable *createMacroTable(void)
 {
     MacroTable *table = (MacroTable *)malloc(sizeof(MacroTable));
@@ -18,6 +26,10 @@ MacroTable *createMacroTable(void)
     return table;
 }
 
+
+
+
+/* the func recognizes new MACRO and and creates new node in the list with the MACRO name */
 void addMacro(MacroTable *table, const char *name)
 {
     MacroNode *node = (MacroNode *)malloc(sizeof(MacroNode));
@@ -33,6 +45,11 @@ void addMacro(MacroTable *table, const char *name)
     table->head = node;
 }
 
+
+
+
+
+/* that func add one node of line of text in the size of the line to the array of the MACROS */
 void addMacroLine(MacroTable *table, const char *line)
 {
     MacroNode *node = table->head;
@@ -49,6 +66,11 @@ void addMacroLine(MacroTable *table, const char *line)
     node->lineCount++;
 }
 
+
+
+
+
+/* the func searching for something suitble in the MACROS table */
 MacroNode *findMacro(MacroTable *table, const char *name)
 {
     MacroNode *current = table->head;
@@ -61,6 +83,10 @@ MacroNode *findMacro(MacroTable *table, const char *name)
     return NULL;
 }
 
+
+
+
+/* that func frees the memory of all lines and the table */
 void freeMacroTable(MacroTable *table)
 {
     MacroNode *current = table->head;
@@ -79,16 +105,20 @@ void freeMacroTable(MacroTable *table)
     free(table);
 }
 
-/* ── Internal helpers ───────────────────────────────────── */
 
-/* Returns 1 if the line starts with the keyword "mcro" */
+
+
+/* checks if the line starts with "mcro" and with/without tab space after it */
 static int isMacroStart(const char *line)
 {
     return (strncmp(line, "mcro", 4) == 0 &&
             (line[4] == ' ' || line[4] == '\t'));
 }
 
-/* Returns 1 if the line is "mcroend" */
+
+
+
+/* checks if the line ends with "mcroend"*/
 static int isMacroEnd(const char *line)
 {
     int i = 0;
@@ -97,7 +127,10 @@ static int isMacroEnd(const char *line)
     return (strncmp(line + i, "mcroend", 7) == 0);
 }
 
-/* Copy the macro name from a "mcro <name>" line into dest */
+
+
+
+/* extract and copy the macro name itself from the line */
 static void extractMacroName(const char *line, char *dest)
 {
     int i = 4; /* skip "mcro" */
@@ -114,8 +147,10 @@ static void extractMacroName(const char *line, char *dest)
     dest[j] = '\0';
 }
 
-/* ── Main pre-assembler ──────────────────────────────────── */
 
+
+
+/* that func evry line one after another and store the 'body' of the MACRO by checking when MACRO starts or ends */
 void runPreprocessor(FILE *asFile, FILE *amFile)
 {
     char line[MAX_LINE_LENGTH];
@@ -126,7 +161,7 @@ void runPreprocessor(FILE *asFile, FILE *amFile)
 
     while (fgets(line, MAX_LINE_LENGTH, asFile))
     {
-        /* Skip leading whitespace for keyword checks only */
+        /* skip white-space in the start */
         if (isComment(line) || isEmptyLine(line))
         {
             if (!insideMacro)
@@ -154,7 +189,7 @@ void runPreprocessor(FILE *asFile, FILE *amFile)
             continue;
         }
 
-        /* Check if this line is a macro call */
+        /* check if the line is a macro */
         get_first_word(line, firstName);
         macro = findMacro(table, firstName);
 

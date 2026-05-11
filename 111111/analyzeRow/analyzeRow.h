@@ -5,9 +5,10 @@
 #include "../instructions/instructionTable.h"
 
 
-/* Analyze one source line during the first pass.
-   IC and DC are updated internally through their module functions.
-   Returns 1 on success, 0 if a (non-fatal) error was found on the line. */
+/*
+scans one line from the file, updates memory counters, and catches errors
+returns 1 for success, 0 for failure
+*/
 int analyzeRow(char *line, int lineNum);
 
 #endif

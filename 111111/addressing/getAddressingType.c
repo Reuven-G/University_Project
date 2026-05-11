@@ -1,6 +1,10 @@
 #include "addressingType.h"
 #include "../labels/labels.h"
 
+
+
+
+/* checks the type of the of the operand */
 int getAddressingType(char *operand)
 {
     if (operand[0] == '#')

@@ -16,29 +16,28 @@ typedef struct MacroNode
     struct MacroNode *next;
 } MacroNode;
 
-/* Head of the macro linked list */
+/* head of the macro linked list */
 typedef struct
 {
     MacroNode *head;
 } MacroTable;
 
-/* Create an empty macro table */
+/* allocatee memory to the main structure that holds the list of the MACROS */
 MacroTable *createMacroTable(void);
 
-/* Add a new macro to the table */
+/* the func recognizes new MACRO and and creates new node in the list with the MACRO name */
 void addMacro(MacroTable *table, const char *name);
 
-/* Append a body line to the most recently added macro */
+/* that func add one node of line of text in the size of the line to the array of the MACROS */
 void addMacroLine(MacroTable *table, const char *line);
 
-/* Find a macro by name, returns NULL if not found */
+/* the func searching for something suitble in the MACROS table */
 MacroNode *findMacro(MacroTable *table, const char *name);
 
-/* Free all memory used by the macro table */
+/* that func frees the memory of all lines and the table */
 void freeMacroTable(MacroTable *table);
 
-/* Main pre-assembler entry point:
-   reads .as file, expands macros, writes .am file */
+/* that func evry line one after another and store the 'body' of the MACRO by checking when MACRO starts or ends */
 void runPreprocessor(FILE *asFile, FILE *amFile);
 
 #endif

@@ -16,8 +16,14 @@
 #define MAX_LABEL_LEN  31
 #define MAX_TOKEN_LEN  82
 
-/* ── Internal helpers ───────────────────────────────── */
+/*
+that script take every line that given and analayzing it
+*/
 
+
+
+
+/* the func fishes every word in the line out between the blank spaces */
 static int readToken(const char *line, int i, char *dest)
 {
     int j = 0;
@@ -31,11 +37,11 @@ static int readToken(const char *line, int i, char *dest)
     return i;
 }
 
-/* ── Instruction handler ────────────────────────────── */
 
-static int handleInstruction(const char *cmdName, char *operandStr,
-                              int hasLabel, const char *labelName,
-                              int lineNum)
+
+
+/* that func operates the instruction (does they exist in the table, what are they, etc.) */
+static int handleInstruction(const char *cmdName, char *operandStr, int hasLabel, const char *labelName, int lineNum)
 {
     char        op1[MAX_TOKEN_LEN];
     char        op2[MAX_TOKEN_LEN];
@@ -96,7 +102,6 @@ static int handleInstruction(const char *cmdName, char *operandStr,
     if (hasLabel)
     {
         existing = findSymbol((char *)labelName);
-        /* A forward .entry declaration is not a real definition — allow it */
         if (existing != NULL && existing->type != ENTRY_LABEL)
         {
             fprintf(stderr,
@@ -113,11 +118,11 @@ static int handleInstruction(const char *cmdName, char *operandStr,
     return 1;
 }
 
-/* ── Directive handlers ─────────────────────────────── */
 
-static int handleDirectiveLine(int dirType, char *rest,
-                                int hasLabel, const char *labelName,
-                                int lineNum)
+
+
+/* that func operates all the lines that start wit "." */
+static int handleDirectiveLine(int dirType, char *rest, int hasLabel, const char *labelName, int lineNum)
 {
     int     *dataImage = getDataImage();
     int      oldDC;
@@ -207,17 +212,18 @@ static int handleDirectiveLine(int dirType, char *rest,
             handleEntry(entName);
             break;
         }
-
+		
         default:
             fprintf(stderr, "Error line %d: unknown directive\n", lineNum);
             return 0;
     }
-
     return 1;
 }
 
-/* ── Public entry point ─────────────────────────────── */
 
+
+
+/* that func decides to witch class every line is belongs */
 int analyzeRow(char *line, int lineNum)
 {
     char label[MAX_LABEL_LEN];
@@ -227,7 +233,7 @@ int analyzeRow(char *line, int lineNum)
     int  j = 0;
     int  dirType;
 
-    /* ── 1. Detect optional label (word ending in ':') ── */
+    /* detect optional label (the word ends with ':') */
     i = skipWhiteChars(line, 0);
     j = 0;
     while (line[i] != '\0' && line[i] != ':' &&
@@ -256,13 +262,11 @@ int analyzeRow(char *line, int lineNum)
         i = skipWhiteChars(line, 0);
     }
 
-    /* ── 2. Read command / directive name ── */
     i = readToken(line, i, command);
 
     if (command[0] == '\0')
         return 1;
 
-    /* ── 3. Warn if label precedes .entry / .extern ── */
     if (hasLabel &&
         (strcmp(command, ".entry") == 0 || strcmp(command, ".extern") == 0))
     {
@@ -272,10 +276,8 @@ int analyzeRow(char *line, int lineNum)
         hasLabel = 0;
     }
 
-    /* ── 4. Skip whitespace to reach operand/argument string ── */
     i = skipWhiteChars(line, i);
 
-    /* ── 5. Dispatch ── */
     dirType = getDirectiveType(command);
 
     if (dirType != DIR_NONE)

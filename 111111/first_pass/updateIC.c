@@ -1,5 +1,14 @@
 #include "firstPass.h"
 
+
+
+/*
+that script manages the instruction counter
+*/
+
+
+
+
 static int IC = IC_START;
 
 void updateIC(int delta)

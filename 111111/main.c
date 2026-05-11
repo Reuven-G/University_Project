@@ -11,6 +11,8 @@
 
 
 
+
+
 /* The func adds extension to the filename */
 static void buildFilename(const char *base, const char *ext, char *out)
 {
@@ -21,7 +23,9 @@ static void buildFilename(const char *base, const char *ext, char *out)
 
 
 
-/*  */
+
+
+/* the func put the file throught a 'pipeline' of phases of the whole program */
 static void processFile(const char *baseName)
 {
     char asName[MAX_FILENAME];
@@ -33,15 +37,17 @@ static void processFile(const char *baseName)
     buildFilename(baseName, ".as", asName);
     buildFilename(baseName, ".am", amName);
 
-    /* ── Phase 0: Pre-assembler ── */
-    asFile = fopen(asName, "r");
+
+
+    /* preassembler phase */
+    asFile = fopen(asName, "r"); /* open the .as file to read */
     if (asFile == NULL)
     {
         fprintf(stderr, "Error: cannot open '%s'\n", asName);
         return;
     }
 
-    amFile = fopen(amName, "w");
+    amFile = fopen(amName, "w"); /* create .am file to write inside */
     if (amFile == NULL)
     {
         fprintf(stderr, "Error: cannot create '%s'\n", amName);
@@ -49,11 +55,13 @@ static void processFile(const char *baseName)
         return;
     }
 
-    runPreprocessor(asFile, amFile);
+    runPreprocessor(asFile, amFile); /* the algoritm that 'translates' every macro and write the .am */
     fclose(asFile);
     fclose(amFile);
 
-    /* ── Phase 1: First pass ── */
+
+
+    /* first phase */
     amFile = fopen(amName, "r");
     if (amFile == NULL)
     {
@@ -61,14 +69,15 @@ static void processFile(const char *baseName)
         return;
     }
 
+	/* start a 'new list' after the previous runs */
     resetIC();
     resetDC();
     freeSymbolTable();
 
+	/* stop the program from starting phase 2 if there any errors before */
     firstPassOk = runFirstPass(amFile);
     fclose(amFile);
 
-    /* Per spec: if errors found, do not generate output files */
     if (!firstPassOk)
     {
         fprintf(stderr, "Skipping second pass for '%s' due to errors.\n",
@@ -79,30 +88,39 @@ static void processFile(const char *baseName)
         return;
     }
 
-    /* ── Phase 2: Second pass ── */
+
+
+    /* second phase */
     runSecondPass(baseName);
 
-    /* Cleanup for next file */
+    /* start a 'new list' after the last run */
     freeSymbolTable();
     resetIC();
     resetDC();
 }
 
+
+
+
+
+/* checks the arguments given in the command line */
 int main(int argc, char *argv[])
 {
     int i;
 
+	/* check if the user didnt put file-names in th terminal */
     if (argc < 2)
     {
         fprintf(stderr, "Usage: assembler <file1> [file2] ...\n");
         fprintf(stderr, "       (without the .as extension)\n");
         return 1;
     }
-
+	
+	/* check all files */
     for (i = 1; i < argc; i++)
     {
-        printf("--- Processing: %s ---\n", argv[i]);
-        processFile(argv[i]);
+        printf("--------- Processing: %s \n", argv[i]);
+        processFile(argv[i]); /* sends the file to the func at the top of this script */
     }
 
     return 0;

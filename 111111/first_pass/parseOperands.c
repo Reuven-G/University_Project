@@ -3,20 +3,26 @@
 #include "firstPass.h"
 #include "../first_pass/parseOperands.h"
 
-/* Trim leading and trailing whitespace from a string in-place.
-   Returns a pointer to the first non-space character. */
+/*
+that script works with the white-spaces before and after the line and checks the operands
+*/
+   
+
+
+
+/* the func removes empty spaces */
 static char *trimSpaces(char *s)
 {
     char *end;
 
-    /* trim leading */
+    /* remove from the start */
     while (*s && isspace((unsigned char)*s))
         s++;
 
     if (*s == '\0')
         return s;
 
-    /* trim trailing */
+    /* remove from the end */
     end = s + strlen(s) - 1;
     while (end > s && isspace((unsigned char)*end))
         *end-- = '\0';
@@ -24,6 +30,10 @@ static char *trimSpaces(char *s)
     return s;
 }
 
+
+
+
+/* the func checks the different opperands that were used */
 int parseOperands(char *operandStr, char *op1, char *op2)
 {
     char *token;

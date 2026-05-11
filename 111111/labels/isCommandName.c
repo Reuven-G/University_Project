@@ -1,13 +1,19 @@
 #include <string.h>
 #include "labels.h"
 
-/* list of all possible instructions */
+
+
+
+/* all possible instructions */
 char *commands[] =
 {
   "mov","cmp","add","sub","lea","clr","not","inc","dec","jmp","bne","jsr","red","prn","rts","stop",NULL
 };
 
-/* check if given commant is in the list */
+
+
+
+/* check if the command in the list */
 int isCommandName(char *name)
 {
     int i = 0;

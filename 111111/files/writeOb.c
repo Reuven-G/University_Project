@@ -4,9 +4,11 @@
 
 #define IC_START 100
 
-void writeObFile(const char *baseName,
-                 int *codeImage, char *areImage, int icSize,
-                 int *dataImage, int dcSize)
+
+
+
+/* the creation of the .ob file */
+void writeObFile(const char *baseName, int *codeImage, char *areImage, int icSize, int *dataImage, int dcSize)
 {
     char  filename[256];
     FILE *fp;
@@ -24,10 +26,10 @@ void writeObFile(const char *baseName,
         return;
     }
 
-    /* Header line */
+    /* header */
     fprintf(fp, "    %d %d\n", icSize, dcSize);
 
-    /* Code image — ARE letter from areImage[] */
+    /* A.R.E letters */
     addr = IC_START;
     for (i = 0; i < icSize; i++)
     {
@@ -35,7 +37,7 @@ void writeObFile(const char *baseName,
         addr++;
     }
 
-    /* Data image — always Absolute */
+    /* data image */
     for (i = 0; i < dcSize; i++)
     {
         fprintf(fp, "%04d %03X A\n", addr, dataImage[i] & 0xFFF);

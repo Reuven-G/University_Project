@@ -3,13 +3,17 @@
 #include "files.h"
 #include "../symbolTable/symbolTable.h"
 
+
+
+
+/* create the .ent file */
 void writeEntFile(const char *baseName)
 {
     char    filename[256];
     FILE   *fp;
     Symbol *sym;
 
-    /* Check if any entry symbols exist at all */
+    /* check if entry symbols exists */
     sym = head;
     while (sym != NULL)
     {
@@ -18,8 +22,9 @@ void writeEntFile(const char *baseName)
         sym = sym->next;
     }
 
+	/* dont create the file if no entry symbols */
     if (sym == NULL)
-        return; /* no entry symbols — do not create the file */
+        return;
 
     strncpy(filename, baseName, 251);
     filename[251] = '\0';
@@ -32,7 +37,6 @@ void writeEntFile(const char *baseName)
         return;
     }
 
-    /* Write all entry symbols with zero-padded 4-digit address */
     sym = head;
     while (sym != NULL)
     {

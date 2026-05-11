@@ -1,5 +1,9 @@
 #include <string.h>
 
+
+
+
+/* the func checks if it is a register */
 int isRegister(char *word)
 {
     if(strlen(word) != 2)

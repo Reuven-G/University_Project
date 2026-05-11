@@ -1,12 +1,10 @@
 #include "calcInstructionSize.h"
 #include "../addressing/addressingType.h"
 
-/* Per the 12-bit architecture spec:
-   - Every instruction takes 1 base word.
-   - Each operand adds 1 extra word, EXCEPT:
-     if BOTH src and dst are REGISTER mode, they share a single
-     extra word (register pair encoding), so only +1 total instead of +2. */
 
+
+
+/* the func calculates how much words in the memory the operand will take */
 int calcInstructionSize(int numOperands, int addrSrc, int addrDst)
 {
     int L = 1; /* base word always present */
@@ -21,11 +19,9 @@ int calcInstructionSize(int numOperands, int addrSrc, int addrDst)
         return L;
     }
 
-    /* numOperands == 2 */
     if (addrSrc == REGISTER && addrDst == REGISTER)
     {
-        /* both registers share one extra word */
-        L += 1;
+        L += 1; /* both registers share one extra word */
     }
     else
     {
