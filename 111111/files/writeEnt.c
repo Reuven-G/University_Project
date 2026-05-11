@@ -6,9 +6,10 @@
 void writeEntFile(const char *baseName)
 {
     char    filename[256];
-    FILE   *fp = NULL;
+    FILE   *fp;
     Symbol *sym;
 
+    /* Check if any entry symbols exist at all */
     sym = head;
     while (sym != NULL)
     {
@@ -18,7 +19,7 @@ void writeEntFile(const char *baseName)
     }
 
     if (sym == NULL)
-        return;
+        return; /* no entry symbols — do not create the file */
 
     strncpy(filename, baseName, 251);
     filename[251] = '\0';
@@ -31,6 +32,7 @@ void writeEntFile(const char *baseName)
         return;
     }
 
+    /* Write all entry symbols with zero-padded 4-digit address */
     sym = head;
     while (sym != NULL)
     {
@@ -41,3 +43,4 @@ void writeEntFile(const char *baseName)
 
     fclose(fp);
 }
+

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "symbolTable.h"
 
 void addSymbol(char *name, int address, SymbolType type)
@@ -12,13 +13,15 @@ void addSymbol(char *name, int address, SymbolType type)
 
     if (current != NULL)
     {
-        /* Special case: forward .entry declaration being resolved
-           by the real label definition — update address, keep ENTRY_LABEL */
+        /* Special case: a forward .entry declaration exists (address=0,
+           type=ENTRY_LABEL) and now the real definition has arrived.
+           Update the address and keep the type as ENTRY_LABEL so that
+           writeEnt can find it. */
         if (current->type == ENTRY_LABEL &&
             (type == CODE_LABEL || type == DATA_LABEL))
         {
             current->address = address;
-            /* Keep type as ENTRY_LABEL so writeEnt finds it */
+            /* Keep type = ENTRY_LABEL — do NOT downgrade to CODE/DATA */
             return;
         }
 
@@ -39,3 +42,4 @@ void addSymbol(char *name, int address, SymbolType type)
     newSymbol->next    = head;
     head               = newSymbol;
 }
+

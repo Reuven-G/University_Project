@@ -9,6 +9,9 @@
 
 #define MAX_FILENAME 256
 
+
+
+/* The func adds extension to the filename */
 static void buildFilename(const char *base, const char *ext, char *out)
 {
     strncpy(out, base, MAX_FILENAME - 5);
@@ -16,6 +19,9 @@ static void buildFilename(const char *base, const char *ext, char *out)
     strcat(out, ext);
 }
 
+
+
+/*  */
 static void processFile(const char *baseName)
 {
     char asName[MAX_FILENAME];

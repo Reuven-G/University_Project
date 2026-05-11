@@ -8,12 +8,15 @@ void handleEntry(char *name)
 
     if (sym != NULL)
     {
-        /* Already defined — mark it as entry */
+        /* Symbol already defined — mark it as entry */
         sym->type = ENTRY_LABEL;
     }
     else
     {
-        /* Forward reference — add placeholder, address filled later */
+        /* Forward reference — add placeholder with address 0.
+           addSymbol will update the address when the real
+           definition is encountered later. */
         addSymbol(name, 0, ENTRY_LABEL);
     }
 }
+

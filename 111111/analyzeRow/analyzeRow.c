@@ -18,8 +18,6 @@
 
 /* ── Internal helpers ───────────────────────────────── */
 
-/* Copy the next non-whitespace token from line[i] into dest.
-   Returns the new index in line after the token. */
 static int readToken(const char *line, int i, char *dest)
 {
     int j = 0;
@@ -39,13 +37,14 @@ static int handleInstruction(const char *cmdName, char *operandStr,
                               int hasLabel, const char *labelName,
                               int lineNum)
 {
-    char op1[MAX_TOKEN_LEN];
-    char op2[MAX_TOKEN_LEN];
-    char op1copy[MAX_TOKEN_LEN];
-    int  numOps;
-    int  addrSrc = -1;
-    int  addrDst = -1;
-    int  L;
+    char        op1[MAX_TOKEN_LEN];
+    char        op2[MAX_TOKEN_LEN];
+    char        op1copy[MAX_TOKEN_LEN];
+    int         numOps;
+    int         addrSrc = -1;
+    int         addrDst = -1;
+    int         L;
+    Symbol     *existing;
     Instruction *inst;
 
     inst = findInstruction((char *)cmdName);
@@ -56,7 +55,6 @@ static int handleInstruction(const char *cmdName, char *operandStr,
         return 0;
     }
 
-    /* Parse operands — work on a copy because strtok modifies the string */
     strncpy(op1copy, operandStr, MAX_TOKEN_LEN - 1);
     op1copy[MAX_TOKEN_LEN - 1] = '\0';
     numOps = parseOperands(op1copy, op1, op2);
@@ -69,7 +67,6 @@ static int handleInstruction(const char *cmdName, char *operandStr,
         return 0;
     }
 
-    /* Determine addressing modes */
     if (numOps == 2)
     {
         addrSrc = getAddressingType(op1);
@@ -96,10 +93,11 @@ static int handleInstruction(const char *cmdName, char *operandStr,
         }
     }
 
-    /* Register label BEFORE advancing IC so address is correct */
     if (hasLabel)
     {
-        if (findSymbol((char *)labelName) != NULL)
+        existing = findSymbol((char *)labelName);
+        /* A forward .entry declaration is not a real definition — allow it */
+        if (existing != NULL && existing->type != ENTRY_LABEL)
         {
             fprintf(stderr,
                     "Error line %d: label '%s' already defined\n",
@@ -109,7 +107,6 @@ static int handleInstruction(const char *cmdName, char *operandStr,
         addSymbol((char *)labelName, getIC(), CODE_LABEL);
     }
 
-    /* Advance IC by L */
     L = calcInstructionSize(numOps, addrSrc, addrDst);
     updateIC(L);
 
@@ -122,16 +119,18 @@ static int handleDirectiveLine(int dirType, char *rest,
                                 int hasLabel, const char *labelName,
                                 int lineNum)
 {
-    int  *dataImage = getDataImage();
-    int   oldDC;
-    int   dc;
+    int     *dataImage = getDataImage();
+    int      oldDC;
+    int      dc;
+    Symbol  *existing;
 
     switch (dirType)
     {
         case DIR_DATA:
             if (hasLabel)
             {
-                if (findSymbol((char *)labelName) != NULL)
+                existing = findSymbol((char *)labelName);
+                if (existing != NULL && existing->type != ENTRY_LABEL)
                 {
                     fprintf(stderr,
                             "Error line %d: label '%s' already defined\n",
@@ -149,7 +148,8 @@ static int handleDirectiveLine(int dirType, char *rest,
         case DIR_STRING:
             if (hasLabel)
             {
-                if (findSymbol((char *)labelName) != NULL)
+                existing = findSymbol((char *)labelName);
+                if (existing != NULL && existing->type != ENTRY_LABEL)
                 {
                     fprintf(stderr,
                             "Error line %d: label '%s' already defined\n",
@@ -249,11 +249,10 @@ int analyzeRow(char *line, int lineNum)
             return 0;
         }
         hasLabel = 1;
-        i++; /* skip ':' */
+        i++;
     }
     else
     {
-        /* No colon — reset: the word we read is the command, not a label */
         i = skipWhiteChars(line, 0);
     }
 
@@ -261,7 +260,7 @@ int analyzeRow(char *line, int lineNum)
     i = readToken(line, i, command);
 
     if (command[0] == '\0')
-        return 1; /* blank line after label is fine */
+        return 1;
 
     /* ── 3. Warn if label precedes .entry / .extern ── */
     if (hasLabel &&
@@ -296,3 +295,4 @@ int analyzeRow(char *line, int lineNum)
             lineNum, command);
     return 0;
 }
+
