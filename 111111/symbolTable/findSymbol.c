@@ -2,6 +2,10 @@
 
 #include "symbolTable.h"
 
+
+
+
+/* search and find specific name and returns the pointer of it */
 Symbol *findSymbol(char *name)
 {
     Symbol *current = head;

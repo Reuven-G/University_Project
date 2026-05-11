@@ -4,10 +4,13 @@
 #include <ctype.h>
 #include "directives.h"
 
-#define WORD_MAX  2047   /* 2^11 - 1  (12-bit signed max) */
-#define WORD_MIN -2048   /* -2^11     (12-bit signed min) */
+#define WORD_MAX  2047
+#define WORD_MIN -2048
 
-/* Returns 1 if the string is a valid integer (optional leading +/-) */
+
+
+
+/* checks if the string is a valid integer */
 static int isInteger(const char *s)
 {
     if (*s == '+' || *s == '-')
@@ -23,7 +26,10 @@ static int isInteger(const char *s)
     return 1;
 }
 
-/* Trim leading and trailing whitespace, return pointer into s */
+
+
+
+/* remove whitespace */
 static char *trim(char *s)
 {
     char *end;
@@ -34,6 +40,10 @@ static char *trim(char *s)
     return s;
 }
 
+
+
+
+/* tear down the input and check that the number is kosher */
 void handleData(char *line, int *DC, int dataImage[])
 {
     char *token;

@@ -2,6 +2,10 @@
 
 #include "symbolTable.h"
 
+
+
+
+/* freeing the memory for each symbol node */
 void freeSymbolTable(void)
 {
     Symbol *current = head;

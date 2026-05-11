@@ -2,6 +2,10 @@
 
 #include "symbolTable.h"
 
+
+
+
+/* check the linked list of symbols and print the name, memory address and type of each entry */
 void printSymbolTable(void)
 {
     Symbol *current = head;

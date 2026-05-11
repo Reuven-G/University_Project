@@ -4,24 +4,24 @@
 
 #include "symbolTable.h"
 
+
+
+
+/* create new entry in the symbol table and add a new label */
 void addSymbol(char *name, int address, SymbolType type)
 {
     Symbol *newSymbol;
     Symbol *current;
 
+	/* check if already exist */
     current = findSymbol(name);
 
     if (current != NULL)
     {
-        /* Special case: a forward .entry declaration exists (address=0,
-           type=ENTRY_LABEL) and now the real definition has arrived.
-           Update the address and keep the type as ENTRY_LABEL so that
-           writeEnt can find it. */
         if (current->type == ENTRY_LABEL &&
             (type == CODE_LABEL || type == DATA_LABEL))
         {
             current->address = address;
-            /* Keep type = ENTRY_LABEL — do NOT downgrade to CODE/DATA */
             return;
         }
 

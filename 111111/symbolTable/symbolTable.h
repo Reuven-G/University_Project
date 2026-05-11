@@ -1,6 +1,9 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 
+
+
+
 /* label type */
 typedef enum
 {
@@ -9,6 +12,9 @@ typedef enum
     EXTERN_LABEL,
     ENTRY_LABEL
 } SymbolType;
+
+
+
 
 /* structure of a node in the symbol table */
 typedef struct Symbol
@@ -19,19 +25,34 @@ typedef struct Symbol
     struct Symbol *next;
 } Symbol;
 
+
+
+
 /* head of the list */
 extern Symbol *head;
 
-/* add new label to the table */
+
+
+
+/* create new entry in the symbol table and add a new label */
 void addSymbol(char *name, int address, SymbolType type);
 
-/* search for a label in the table */
+
+
+
+/* search and find specific name and returns the pointer of it */
 Symbol *findSymbol(char *name);
 
-/* print for debugging */
+
+
+
+/* check the linked list of symbols and print the name, memory address and type of each entry */
 void printSymbolTable(void);
 
-/* free memory */
+
+
+
+/* freeing the memory for each symbol node */
 void freeSymbolTable(void);
 
 #endif

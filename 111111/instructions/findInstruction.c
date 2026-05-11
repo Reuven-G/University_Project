@@ -3,6 +3,10 @@
 
 extern Instruction instructionTable[];
 
+
+
+
+/* searche the global instruction table for a command by name */
 Instruction *findInstruction(char *name)
 {
     int i = 0;

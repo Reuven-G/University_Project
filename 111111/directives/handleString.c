@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include "directives.h"
 
+
+
+
+/* extract characters from inside quotas */
 void handleString(char *line, int *DC, int dataImage[])
 {
     int i = 0;
 
-    /* Skip leading whitespace */
+    /* skip blank */
     while (line[i] == ' ' || line[i] == '\t')
         i++;
 
-    /* Expect opening quote */
+    /* expect opening quote */
     if (line[i] != '"')
     {
         fprintf(stderr,
@@ -18,7 +22,7 @@ void handleString(char *line, int *DC, int dataImage[])
     }
     i++; /* skip opening quote */
 
-    /* Store characters until closing quote or end of string */
+    /* store characters temporarly */
     while (line[i] != '"' && line[i] != '\0' && line[i] != '\n')
     {
         dataImage[*DC] = (unsigned char)line[i];
@@ -29,10 +33,8 @@ void handleString(char *line, int *DC, int dataImage[])
     if (line[i] != '"')
     {
         fprintf(stderr, "Error: '.string' — missing closing '\"'\n");
-        /* Still store the null terminator */
     }
 
-    /* Null terminator */
     dataImage[*DC] = 0;
     (*DC)++;
 }

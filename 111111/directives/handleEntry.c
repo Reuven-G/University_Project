@@ -2,20 +2,21 @@
 #include "directives.h"
 #include "../symbolTable/symbolTable.h"
 
+
+
+
+/* updates the label as ENTRY or keeps a space for it for later use */
 void handleEntry(char *name)
 {
     Symbol *sym = findSymbol(name);
 
     if (sym != NULL)
     {
-        /* Symbol already defined — mark it as entry */
+        /* mark the symbol as entry if already defined */
         sym->type = ENTRY_LABEL;
     }
     else
     {
-        /* Forward reference — add placeholder with address 0.
-           addSymbol will update the address when the real
-           definition is encountered later. */
         addSymbol(name, 0, ENTRY_LABEL);
     }
 }

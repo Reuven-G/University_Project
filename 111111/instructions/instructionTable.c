@@ -1,6 +1,10 @@
 #include <stddef.h>
 #include "instructionTable.h"
 
+
+
+
+/* instruction table */
 Instruction instructionTable[] = {
 
     {"mov",  0,  0, 2, {1,1,0,1}, {0,1,0,1}},

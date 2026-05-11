@@ -1,5 +1,9 @@
 #include "instructionTable.h"
 
+
+
+
+/* validate the source and destination addressing modes */
 int checkOperands(Instruction *inst, int srcType, int dstType)
 {
     if (inst->operands == 2)

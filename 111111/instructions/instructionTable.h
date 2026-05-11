@@ -1,6 +1,9 @@
 #ifndef INSTRUCTIONS_H
 #define INSTRUCTIONS_H
 
+
+
+
 typedef struct {
 
     char *name;
@@ -13,6 +16,10 @@ typedef struct {
 
 } Instruction;
 
+
+
+
+/* searche the global instruction table for a command by name */
 Instruction *findInstruction(char *name);
 
 #endif

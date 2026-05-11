@@ -13,9 +13,28 @@
 /* checks and returns the type of the word */
 int getDirectiveType(char *word);
 
+
+
+
+/* tear down the input and check that the number is kosher */
 void handleData(char *line, int *DC, int dataImage[]);
+
+
+
+
+/* extract characters from inside quotas */
 void handleString(char *line, int *DC, int dataImage[]);
+
+
+
+
+/* add the label to the table and labels it as EXTERN */
 void handleExtern(char *name);
+
+
+
+
+/* updates the label as ENTRY or keeps a space for it for later use */
 void handleEntry(char *name);
 
 #endif

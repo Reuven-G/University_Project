@@ -7,22 +7,30 @@
 #include "../addressing/addressingType.h"
 #include "../symbolTable/symbolTable.h"
 
-/* Register N is encoded as bitmask: 1 << N */
+
+
+
+/* turns register's number to bitmask */
 static int regMask(const char *op)
 {
     return 1 << (op[1] - '0');
 }
 
-/* ── IMMEDIATE: value stored directly in 12-bit word, ARE=A ── */
+
+
+
+/* turns string to binary number (12-bit) */
 static int encodeImmediate(const char *operand)
 {
-    int value = atoi(operand + 1); /* skip '#' */
+    int value = atoi(operand + 1);
     return value & 0xFFF;
 }
 
-/* ── DIRECT: symbol address stored directly, ARE=R (internal) or E (extern) ── */
-static int encodeDirect(const char *operand, int currentIC,
-                         ExtRef *extRefs, int *extCount, char *are)
+
+
+
+/* searches for the address in the symbol table */
+static int encodeDirect(const char *operand, int currentIC, ExtRef *extRefs, int *extCount, char *are)
 {
     Symbol *sym = findSymbol((char *)operand);
 
@@ -43,20 +51,23 @@ static int encodeDirect(const char *operand, int currentIC,
             (*extCount)++;
         }
         *are = 'E';
-        return 0; /* address = 0 for external */
+        return 0;
     }
 
     *are = 'R';
     return sym->address & 0xFFF;
 }
 
-/* ── RELATIVE: (target - currentIC) stored directly, ARE=R ── */
+
+
+
+/* calculate distance between current IC and target label */
 static int encodeRelative(const char *operand, int currentIC)
 {
     Symbol *sym;
     int     distance;
 
-    sym = findSymbol((char *)(operand + 1)); /* skip '%' */
+    sym = findSymbol((char *)(operand + 1));
 
     if (sym == NULL)
     {
@@ -68,23 +79,29 @@ static int encodeRelative(const char *operand, int currentIC)
     return distance & 0xFFF;
 }
 
-/* ── REGISTER (single operand): bitmask of register number, ARE=A ── */
+
+
+
+/* returns the register as a bitmask */
 static int encodeRegister(const char *operand)
 {
     return regMask(operand) & 0xFFF;
 }
 
-/* ── Register pair: both in one word, ARE=A ── */
+
+
+
+/* pack two registers into one word */
 int encodeRegisterPair(const char *srcOp, const char *dstOp)
 {
     return (regMask(srcOp) | regMask(dstOp)) & 0xFFF;
 }
 
-/* ── Public: encode one operand ── */
-int encodeOperand(const char *operand, int addrType,
-                  int currentIC, int isSrc,
-                  int *codeImage, char *areImage, int imageIndex,
-                  ExtRef *extRefs, int *extCount)
+
+
+
+/* encode the operand after chcking it type */
+int encodeOperand(const char *operand, int addrType, int currentIC, int isSrc, int *codeImage, char *areImage, int imageIndex, ExtRef *extRefs, int *extCount)
 {
     int  word = 0;
     char are  = 'A';
@@ -97,8 +114,7 @@ int encodeOperand(const char *operand, int addrType,
             break;
 
         case DIRECT:
-            word = encodeDirect(operand, currentIC,
-                                extRefs, extCount, &are);
+            word = encodeDirect(operand, currentIC, extRefs, extCount, &are);
             break;
 
         case RELATIVE:
@@ -109,7 +125,7 @@ int encodeOperand(const char *operand, int addrType,
         case REGISTER:
             word = encodeRegister(operand);
             are  = 'A';
-            (void)isSrc; /* register bitmask is same for src and dst */
+            (void)isSrc;
             break;
 
         default:
