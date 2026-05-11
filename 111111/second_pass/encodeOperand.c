@@ -1,32 +1,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "encodeOperand.h"
 #include "encodeInstruction.h"
 #include "../addressing/addressingType.h"
 #include "../symbolTable/symbolTable.h"
 
-/* Register N is encoded as 1<<N (bitmask, not the number itself) */
+/* Register N is encoded as bitmask: 1 << N */
 static int regMask(const char *op)
 {
     return 1 << (op[1] - '0');
 }
 
+/* ── IMMEDIATE: value stored directly in 12-bit word, ARE=A ── */
 static int encodeImmediate(const char *operand)
 {
     int value = atoi(operand + 1); /* skip '#' */
-    return value & 0xFFF;          /* store directly, no shift */
+    return value & 0xFFF;
 }
 
-static int encodeDirect(const char *operand,
-                         int currentIC,
-                         ExtRef *extRefs, int *extCount)
+/* ── DIRECT: symbol address stored directly, ARE=R (internal) or E (extern) ── */
+static int encodeDirect(const char *operand, int currentIC,
+                         ExtRef *extRefs, int *extCount, char *are)
 {
     Symbol *sym = findSymbol((char *)operand);
 
     if (sym == NULL)
     {
         fprintf(stderr, "Error: undefined symbol '%s'\n", operand);
+        *are = 'A';
         return 0;
     }
 
@@ -39,22 +42,21 @@ static int encodeDirect(const char *operand,
             extRefs[*extCount].address  = currentIC;
             (*extCount)++;
         }
-        return 0; /* address=0 for extern, ARE=E shown separately */
+        *are = 'E';
+        return 0; /* address = 0 for external */
     }
 
-    /* Internal: store address directly in 12-bit word */
+    *are = 'R';
     return sym->address & 0xFFF;
 }
-/* ── RELATIVE ── operand is "%LABEL"
-   bits 11-2: (target_address - current_IC) as signed 10-bit, ARE = R (1) */
+
+/* ── RELATIVE: (target - currentIC) stored directly, ARE=R ── */
 static int encodeRelative(const char *operand, int currentIC)
 {
     Symbol *sym;
     int     distance;
-    int     word;
 
-    /* skip the '%' */
-    sym = findSymbol((char *)(operand + 1));
+    sym = findSymbol((char *)(operand + 1)); /* skip '%' */
 
     if (sym == NULL)
     {
@@ -62,64 +64,52 @@ static int encodeRelative(const char *operand, int currentIC)
         return 0;
     }
 
-    /* Distance = target - address of THIS extra word */
     distance = sym->address - currentIC;
-
-    /* Pack signed distance into 10 bits */
-    word  = (distance & 0x3FF) << 2;
-    word |= ARE_RELOCATABLE;
-
-    return word & 0xFFF;
+    return distance & 0xFFF;
 }
 
-/* ── REGISTER (single) ──
-   src register: bits 5-3
-   dst register: bits 2-0
-   ARE = 0 (Absolute)
-   isSrc=1 → place in bits 5-3, isSrc=0 → place in bits 2-0 */
-
-static int encodeRegister(const char *operand, int isSrc)
+/* ── REGISTER (single operand): bitmask of register number, ARE=A ── */
+static int encodeRegister(const char *operand)
 {
-    int word = regMask(operand);
-    return word & 0xFFF;
-    /* Note: src and dst single-register words are the same —
-       just the bitmask of the register. ARE=0 (Absolute). */
+    return regMask(operand) & 0xFFF;
 }
 
-/* ── Public: register pair ────────────────────────────────────────
-   Both src and dst are registers — they share one word.
-   src in bits 5-3, dst in bits 2-0, ARE = 0. */
+/* ── Register pair: both in one word, ARE=A ── */
 int encodeRegisterPair(const char *srcOp, const char *dstOp)
 {
-    /* Both registers in one word: src_mask | dst_mask */
-    int word = regMask(srcOp) | regMask(dstOp);
-    return word & 0xFFF;
+    return (regMask(srcOp) | regMask(dstOp)) & 0xFFF;
 }
 
-/* ── Public: encode one operand extra word ───────────────────────── */
+/* ── Public: encode one operand ── */
 int encodeOperand(const char *operand, int addrType,
                   int currentIC, int isSrc,
-                  int *codeImage, int imageIndex,
+                  int *codeImage, char *areImage, int imageIndex,
                   ExtRef *extRefs, int *extCount)
 {
-    int word = 0;
+    int  word = 0;
+    char are  = 'A';
 
     switch (addrType)
     {
         case IMMEDIATE:
             word = encodeImmediate(operand);
+            are  = 'A';
             break;
 
         case DIRECT:
-            word = encodeDirect(operand, currentIC, extRefs, extCount);
+            word = encodeDirect(operand, currentIC,
+                                extRefs, extCount, &are);
             break;
 
         case RELATIVE:
             word = encodeRelative(operand, currentIC);
+            are  = 'R';
             break;
 
         case REGISTER:
-            word = encodeRegister(operand, isSrc);
+            word = encodeRegister(operand);
+            are  = 'A';
+            (void)isSrc; /* register bitmask is same for src and dst */
             break;
 
         default:
@@ -128,5 +118,7 @@ int encodeOperand(const char *operand, int addrType,
     }
 
     codeImage[imageIndex] = word;
+    areImage[imageIndex]  = are;
     return 1;
 }
+

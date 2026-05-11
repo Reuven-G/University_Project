@@ -34,7 +34,6 @@ static void resolveEntryLabels(void)
     {
         if (ent->type == ENTRY_LABEL && ent->address == 0)
         {
-            /* Search for a real definition of this name */
             def = head;
             while (def != NULL)
             {

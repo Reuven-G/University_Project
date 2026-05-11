@@ -8,6 +8,12 @@ void handleEntry(char *name)
 
     if (sym != NULL)
     {
+        /* Already defined — mark it as entry */
         sym->type = ENTRY_LABEL;
+    }
+    else
+    {
+        /* Forward reference — add placeholder, address filled later */
+        addSymbol(name, 0, ENTRY_LABEL);
     }
 }

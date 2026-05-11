@@ -9,7 +9,6 @@ void writeEntFile(const char *baseName)
     FILE   *fp = NULL;
     Symbol *sym;
 
-    /* First pass: check if any entry symbols exist at all */
     sym = head;
     while (sym != NULL)
     {
@@ -19,7 +18,7 @@ void writeEntFile(const char *baseName)
     }
 
     if (sym == NULL)
-        return; /* no entry symbols — do not create the file */
+        return;
 
     strncpy(filename, baseName, 251);
     filename[251] = '\0';
@@ -32,12 +31,11 @@ void writeEntFile(const char *baseName)
         return;
     }
 
-    /* Write all entry symbols */
     sym = head;
     while (sym != NULL)
     {
         if (sym->type == ENTRY_LABEL)
-            fprintf(fp, "%s %d\n", sym->name, sym->address);
+            fprintf(fp, "%s %04d\n", sym->name, sym->address);
         sym = sym->next;
     }
 
