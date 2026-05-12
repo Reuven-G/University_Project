@@ -63,5 +63,8 @@ $(TARGET): $(OBJS)
 clean:
 	rm -f $(OBJS) $(TARGET)
 	find . -name "*.am" -delete
+	find . -name "*.ob" -delete
+	find . -name "*.ext" -delete
+	find . -name "*.ent" -delete
 
 .PHONY: clean

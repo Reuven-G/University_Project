@@ -151,7 +151,7 @@ static int handleDirectiveLine(int dirType, char *rest, int hasLabel, const char
                 existing = findSymbol((char *)labelName);
                 if (existing != NULL && existing->type != ENTRY_LABEL)
                 {
-                    fprintf(stderr,m "Error line %d: label '%s' already defined\n", lineNum, labelName);
+                    fprintf(stderr, "Error line %d: label '%s' already defined\n", lineNum, labelName);
                     return 0;
                 }
                 addSymbol((char *)labelName, getDC(), DATA_LABEL);

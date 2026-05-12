@@ -1,4 +1,4 @@
-; test3
+; test4
 .entry START
 .extern LIB
 mcro CALL_LIB
