@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 	/* check all files */
     for (i = 1; i < argc; i++)
     {
-        printf("--------- Processing: %s \n", argv[i]);
+        printf("----- Processing: %s -----\n", argv[i]);
         processFile(argv[i]); /* sends the file to the func at the top of this script */
     }
 

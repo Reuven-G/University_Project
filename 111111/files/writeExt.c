@@ -12,14 +12,16 @@ void writeExtFile(const char *baseName, ExtRef *extRefs, int count)
     FILE *fp;
     int   i;
 
-	/* dont create file if no extern uses */
+	/* dont create file if no extern labels */
     if (count == 0)
         return;
 
+	/* build the file */
     strncpy(filename, baseName, 251);
     filename[251] = '\0';
     strcat(filename, ".ext");
 
+	/* allow to write to the file */
     fp = fopen(filename, "w");
     if (fp == NULL)
     {

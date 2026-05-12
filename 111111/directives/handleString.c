@@ -17,7 +17,7 @@ void handleString(char *line, int *DC, int dataImage[])
     if (line[i] != '"')
     {
         fprintf(stderr,
-                "Error: '.string' — expected '\"' but got '%c'\n", line[i]);
+                "Error: '.string' - expected '\"' but got '%c'\n", line[i]);
         return;
     }
     i++; /* skip opening quote */
@@ -32,7 +32,7 @@ void handleString(char *line, int *DC, int dataImage[])
 
     if (line[i] != '"')
     {
-        fprintf(stderr, "Error: '.string' — missing closing '\"'\n");
+        fprintf(stderr, "Error: '.string' - missing closing '\"'\n");
     }
 
     dataImage[*DC] = 0;

@@ -3,7 +3,7 @@
 #include <ctype.h>
 
 /* func that get the first word in the line */
-void get_first_word(char *line, char *dest) {
+void getFirstWord(char *line, char *dest) {
     int i = 0, j = 0;
 
     /* ignore all space before the first word */

@@ -8,6 +8,7 @@
 /* freeing the memory for each symbol node */
 void freeSymbolTable(void)
 {
+	/* variables */
     Symbol *current = head;
     Symbol *temp;
 

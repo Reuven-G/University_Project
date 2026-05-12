@@ -23,10 +23,12 @@ static void offsetDataSymbols(void)
  
     while (sym != NULL)
     {
+		/* push forword if its a data label */
         if (sym->type == DATA_LABEL)
         {
             sym->address += finalIC;
         }
+		/* update entry labels that point to data */
         else if (sym->type == ENTRY_LABEL && sym->address < IC_START)
         {
             sym->address += finalIC;
@@ -46,14 +48,14 @@ static void resolveEntryLabels(void)
  
     while (ent != NULL)
     {
+		/* search for entry labels without address */
         if (ent->type == ENTRY_LABEL && ent->address == 0)
         {
             def = head;
             while (def != NULL)
             {
-                if (def != ent &&
-                    strcmp(def->name, ent->name) == 0 &&
-                    (def->type == CODE_LABEL || def->type == DATA_LABEL))
+                /* found */
+				if (def != ent && strcmp(def->name, ent->name) == 0 && (def->type == CODE_LABEL || def->type == DATA_LABEL))
                 {
                     ent->address = def->address;
                     break;
@@ -61,6 +63,7 @@ static void resolveEntryLabels(void)
                 def = def->next;
             }
         }
+		/* move to next symbol */
         ent = ent->next;
     }
 }
@@ -75,15 +78,17 @@ int runFirstPass(FILE *fp)
     int  lineNum  = 0;
     int  hasError = 0;
  
+	/* read the file line after line */
     while (fgets(line, MAX_LINE_LEN, fp) != NULL)
     {
         lineNum++;
  
+		/* skip blank lines and commenets */
         if (isEmptyLine(line) || isComment(line))
             continue;
  
         if (!analyzeRow(line, lineNum))
-            hasError = 1;
+            hasError = 1; /* there is an errot but we keep looking for more */
     }
  
     offsetDataSymbols();

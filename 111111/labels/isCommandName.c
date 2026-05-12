@@ -13,7 +13,7 @@ char *commands[] =
 
 
 
-/* check if the command in the list */
+/* check if the string is a command in the list */
 int isCommandName(char *name)
 {
     int i = 0;

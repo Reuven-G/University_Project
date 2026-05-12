@@ -19,11 +19,11 @@ static int regMask(const char *op)
 
 
 
-/* turns string to binary number (12-bit) */
+/* turns immediate to binary number (12-bit) */
 static int encodeImmediate(const char *operand)
 {
-    int value = atoi(operand + 1);
-    return value & 0xFFF;
+    int value = atoi(operand + 1); /* +1 to skip # */
+    return value & 0xFFF; /* keep only 12 bits */
 }
 
 
@@ -41,6 +41,7 @@ static int encodeDirect(const char *operand, int currentIC, ExtRef *extRefs, int
         return 0;
     }
 
+	/* if its external label log it to extRefs */
     if (sym->type == EXTERN_LABEL)
     {
         if (*extCount < 256)
@@ -50,11 +51,11 @@ static int encodeDirect(const char *operand, int currentIC, ExtRef *extRefs, int
             extRefs[*extCount].address  = currentIC;
             (*extCount)++;
         }
-        *are = 'E';
+        *are = 'E'; /* external label marked as "E" */
         return 0;
     }
 
-    *are = 'R';
+    *are = 'R'; /* local label marked as "R" */
     return sym->address & 0xFFF;
 }
 
@@ -75,7 +76,7 @@ static int encodeRelative(const char *operand, int currentIC)
         return 0;
     }
 
-    distance = sym->address - currentIC;
+    distance = sym->address - currentIC; /* distance = place_to_go - place_now */
     return distance & 0xFFF;
 }
 
@@ -104,7 +105,7 @@ int encodeRegisterPair(const char *srcOp, const char *dstOp)
 int encodeOperand(const char *operand, int addrType, int currentIC, int isSrc, int *codeImage, char *areImage, int imageIndex, ExtRef *extRefs, int *extCount)
 {
     int  word = 0;
-    char are  = 'A';
+    char are  = 'A'; /* default */
 
     switch (addrType)
     {

@@ -15,10 +15,12 @@ void writeObFile(const char *baseName, int *codeImage, char *areImage, int icSiz
     int   i;
     int   addr;
 
+	/* build the file */
     strncpy(filename, baseName, 251);
     filename[251] = '\0';
     strcat(filename, ".ob");
 
+	/* allow to write to the file */
     fp = fopen(filename, "w");
     if (fp == NULL)
     {

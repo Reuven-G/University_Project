@@ -8,6 +8,7 @@
 /* search and find specific name and returns the pointer of it */
 Symbol *findSymbol(char *name)
 {
+	/* variable */
     Symbol *current = head;
 
     while (current != NULL)

@@ -11,8 +11,10 @@ Instruction *findInstruction(char *name)
 {
     int i = 0;
 
+	/* loop throught the table */
     while (instructionTable[i].name != NULL)
     {
+		/* compare names */
         if (strcmp(instructionTable[i].name, name) == 0)
             return &instructionTable[i];
 

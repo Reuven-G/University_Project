@@ -50,27 +50,27 @@ void handleData(char *line, int *DC, int dataImage[])
     char *trimmed;
     int   value;
 
+	/* split line by "," */
     token = strtok(line, ",");
 
     while (token != NULL)
     {
         trimmed = trim(token);
 
+		/* check if its an int */
         if (!isInteger(trimmed))
         {
-            fprintf(stderr, "Error: '.data' — '%s' is not a valid integer\n",
-                    trimmed);
+            fprintf(stderr, "Error: '.data' - '%s' is not a valid integer\n", trimmed);
             token = strtok(NULL, ",");
             continue;
         }
 
+		/* convert string to int */
         value = atoi(trimmed);
 
         if (value < WORD_MIN || value > WORD_MAX)
         {
-            fprintf(stderr,
-                    "Error: '.data' — value %d is out of 12-bit range\n",
-                    value);
+            fprintf(stderr, "Error: '.data' - value %d is out of 12-bit range\n", value);
             token = strtok(NULL, ",");
             continue;
         }

@@ -14,9 +14,7 @@ typedef struct
 
 
 /* create the .ob file */
-void writeObFile(const char *baseName,
-                 int *codeImage, char *areImage, int icSize,
-                 int *dataImage, int dcSize);
+void writeObFile(const char *baseName, int *codeImage, char *areImage, int icSize, int *dataImage, int dcSize);
 
 
 

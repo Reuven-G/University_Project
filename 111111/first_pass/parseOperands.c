@@ -47,6 +47,7 @@ int parseOperands(char *operandStr, char *op1, char *op2)
 
     while (token != NULL && count < 2)
     {
+		/* remove space around operands */
         trimmed = trimSpaces(token);
         
         if (trimmed[0] != '\0')
@@ -57,6 +58,7 @@ int parseOperands(char *operandStr, char *op1, char *op2)
               strcpy(op2, trimmed);
           count++;
         }
+		
         token = strtok(NULL, ",");
     }
 

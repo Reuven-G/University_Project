@@ -22,14 +22,16 @@ void writeEntFile(const char *baseName)
         sym = sym->next;
     }
 
-	/* dont create the file if no entry symbols */
+	/* dont create the file if there no entry symbols */
     if (sym == NULL)
         return;
 
+	/* create the file */
     strncpy(filename, baseName, 251);
     filename[251] = '\0';
     strcat(filename, ".ent");
 
+	/* allow writing to the file */
     fp = fopen(filename, "w");
     if (fp == NULL)
     {
@@ -37,6 +39,7 @@ void writeEntFile(const char *baseName)
         return;
     }
 
+	/* write every entry symbol from the table to the file */
     sym = head;
     while (sym != NULL)
     {

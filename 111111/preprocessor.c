@@ -233,7 +233,7 @@ void runPreprocessor(FILE *asFile, FILE *amFile)
  
         if (macro != NULL)
         {
-            /* Expand the macro: write all body lines to .am */
+            /* expand the macro: write all body lines to .am */
             for (k = 0; k < macro->lineCount; k++)
                 fputs(macro->lines[k], amFile);
         }

@@ -14,10 +14,7 @@ void printSymbolTable(void)
 
     while (current != NULL)
     {
-        printf("Name: %s | Address: %d | Type: %d\n",
-               current->name,
-               current->address,
-               current->type);
+        printf("Name: %s | Address: %d | Type: %d\n", current->name, current->address, current->type);
 
         current = current->next;
     }

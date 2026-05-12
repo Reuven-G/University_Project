@@ -59,9 +59,9 @@ static int skipLabelIndex(const char *line)
         i++;
 
     if (line[i] == ':')
-        return i + 1;
+        return i + 1; /* return place after the label */
 
-    return 0;
+    return 0; /* label not found, start from start */
 }
 
 
@@ -94,16 +94,17 @@ static int encodeInstructionLine(const char *line, int lineNum)
     int          currentAddr;
     Instruction *inst;
  
+	/* check what command we got */
     i = readToken(line, 0, command);
     if (command[0] == '\0') return 1;
- 
     inst = findInstruction(command);
     if (inst == NULL) return 1;
  
+	/* check what is the operands */
     i = skipWhiteChars(line, i);
     strncpy(operandBuf, line + i, MAX_TOKEN_LEN - 1);
     operandBuf[MAX_TOKEN_LEN - 1] = '\0';
- 
+	
     numOps = parseOperands(operandBuf, op1, op2);
  
     if (numOps == 2)
@@ -116,6 +117,7 @@ static int encodeInstructionLine(const char *line, int lineNum)
         addrDst = getAddressingType(op1);
     }
  
+	/* encode the first word */
     baseIndex            = codeIndex;
     baseWord             = encodeBaseWord(inst, addrSrc, addrDst);
     currentAddr          = IC_START + codeIndex;
@@ -137,14 +139,14 @@ static int encodeInstructionLine(const char *line, int lineNum)
             return 1;
         }
  
+		/* source and destination */
         encodeOperand(op1, addrSrc, currentAddr, 1, codeImage, areImage, codeIndex, extRefs, &extCount);
         codeIndex++;
         currentAddr++;
- 
         encodeOperand(op2, addrDst, currentAddr, 0, codeImage, areImage, codeIndex, extRefs, &extCount);
         codeIndex++;
     }
-    else /* numOps == 1 */
+    else /* only one operand */
     {
         encodeOperand(op1, addrDst, currentAddr, 0, codeImage, areImage, codeIndex, extRefs, &extCount);
         codeIndex++;
@@ -182,22 +184,27 @@ void runSecondPass(const char *baseName)
         return;
     }
  
+	/* reset before start */
     codeIndex = 0;
     extCount  = 0;
  
+	/* loop on the file and encode everything */
     while (fgets(line, MAX_LINE_LEN, fp) != NULL)
     {
         lineNum++;
  
+		/* ignore empty lines and comments */
         if (isEmptyLine(line) || isComment(line))
             continue;
  
         labelEnd = skipLabelIndex(line);
         readToken(line, labelEnd, command);
  
+		/* it is already handled in pass 1 */
         if (strcmp(command, ".entry")  == 0 || strcmp(command, ".extern") == 0 || strcmp(command, ".data")   == 0 || strcmp(command, ".string") == 0)
             continue;
  
+		/* trying to encode the instruction */
         if (!encodeInstructionLine(line + labelEnd, lineNum))
             hasError = 1;
     }
@@ -210,6 +217,7 @@ void runSecondPass(const char *baseName)
         return;
     }
  
+	/* check if we have .entry for label hat dont exist */
     sym = head;
     while (sym != NULL)
     {
@@ -222,6 +230,8 @@ void runSecondPass(const char *baseName)
     }
     if (hasError) return;
  
+ 
+	/* all good */
     icSize    = codeIndex;
     dataImage = getDataImage();
     dcSize    = getDC();

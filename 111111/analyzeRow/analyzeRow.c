@@ -28,8 +28,7 @@ static int readToken(const char *line, int i, char *dest)
 {
     int j = 0;
     i = skipWhiteChars(line, i);
-    while (line[i] != '\0' && line[i] != ' ' &&
-           line[i] != '\t' && line[i] != '\n')
+    while (line[i] != '\0' && line[i] != ' ' && line[i] != '\t' && line[i] != '\n')
     {
         dest[j++] = line[i++];
     }
@@ -53,11 +52,11 @@ static int handleInstruction(const char *cmdName, char *operandStr, int hasLabel
     Symbol     *existing;
     Instruction *inst;
 
+	/* search for command in instruction table */
     inst = findInstruction((char *)cmdName);
     if (inst == NULL)
     {
-        fprintf(stderr, "Error line %d: unknown instruction '%s'\n",
-                lineNum, cmdName);
+        fprintf(stderr, "Error line %d: unknown instruction '%s'\n", lineNum, cmdName);
         return 0;
     }
 
@@ -65,14 +64,14 @@ static int handleInstruction(const char *cmdName, char *operandStr, int hasLabel
     op1copy[MAX_TOKEN_LEN - 1] = '\0';
     numOps = parseOperands(op1copy, op1, op2);
 
+	/* check if the number of operands is ok */
     if (numOps != inst->operands)
     {
-        fprintf(stderr,
-                "Error line %d: '%s' expects %d operand(s), got %d\n",
-                lineNum, cmdName, inst->operands, numOps);
+        fprintf(stderr, "Error line %d: '%s' expects %d operand(s), got %d\n", lineNum, cmdName, inst->operands, numOps);
         return 0;
     }
 
+	/* check addressing mode */
     if (numOps == 2)
     {
         addrSrc = getAddressingType(op1);
@@ -80,9 +79,7 @@ static int handleInstruction(const char *cmdName, char *operandStr, int hasLabel
 
         if (!checkOperands(inst, addrSrc, addrDst))
         {
-            fprintf(stderr,
-                    "Error line %d: illegal addressing mode for '%s'\n",
-                    lineNum, cmdName);
+            fprintf(stderr, "Error line %d: illegal addressing mode for '%s'\n", lineNum, cmdName);
             return 0;
         }
     }
@@ -92,26 +89,24 @@ static int handleInstruction(const char *cmdName, char *operandStr, int hasLabel
 
         if (!checkOperands(inst, -1, addrDst))
         {
-            fprintf(stderr,
-                    "Error line %d: illegal addressing mode for '%s'\n",
-                    lineNum, cmdName);
+            fprintf(stderr, "Error line %d: illegal addressing mode for '%s'\n", lineNum, cmdName);
             return 0;
         }
     }
 
+	/* add label to the symbol table */
     if (hasLabel)
     {
         existing = findSymbol((char *)labelName);
         if (existing != NULL && existing->type != ENTRY_LABEL)
         {
-            fprintf(stderr,
-                    "Error line %d: label '%s' already defined\n",
-                    lineNum, labelName);
+            fprintf(stderr, "Error line %d: label '%s' already defined\n", lineNum, labelName);
             return 0;
         }
         addSymbol((char *)labelName, getIC(), CODE_LABEL);
     }
-
+	
+	/* calculate how many words the instruction take and update IC */
     L = calcInstructionSize(numOps, addrSrc, addrDst);
     updateIC(L);
 
@@ -132,14 +127,13 @@ static int handleDirectiveLine(int dirType, char *rest, int hasLabel, const char
     switch (dirType)
     {
         case DIR_DATA:
+			/* add label to the table with current DC */
             if (hasLabel)
             {
                 existing = findSymbol((char *)labelName);
                 if (existing != NULL && existing->type != ENTRY_LABEL)
                 {
-                    fprintf(stderr,
-                            "Error line %d: label '%s' already defined\n",
-                            lineNum, labelName);
+                    fprintf(stderr, "Error line %d: label '%s' already defined\n", lineNum, labelName);
                     return 0;
                 }
                 addSymbol((char *)labelName, getDC(), DATA_LABEL);
@@ -151,14 +145,13 @@ static int handleDirectiveLine(int dirType, char *rest, int hasLabel, const char
             break;
 
         case DIR_STRING:
+			/* add label to the table with current DC */
             if (hasLabel)
             {
                 existing = findSymbol((char *)labelName);
                 if (existing != NULL && existing->type != ENTRY_LABEL)
                 {
-                    fprintf(stderr,
-                            "Error line %d: label '%s' already defined\n",
-                            lineNum, labelName);
+                    fprintf(stderr,m "Error line %d: label '%s' already defined\n", lineNum, labelName);
                     return 0;
                 }
                 addSymbol((char *)labelName, getDC(), DATA_LABEL);
@@ -175,16 +168,13 @@ static int handleDirectiveLine(int dirType, char *rest, int hasLabel, const char
             int i = 0;
             int j = 0;
             while (rest[i] == ' ' || rest[i] == '\t') i++;
-            while (rest[i] && rest[i] != '\n' &&
-                   rest[i] != ' ' && rest[i] != '\t')
+            while (rest[i] && rest[i] != '\n' && rest[i] != ' ' && rest[i] != '\t')
                 extName[j++] = rest[i++];
             extName[j] = '\0';
 
             if (!isValidLabel(extName))
             {
-                fprintf(stderr,
-                        "Error line %d: invalid extern label '%s'\n",
-                        lineNum, extName);
+                fprintf(stderr, "Error line %d: invalid extern label '%s'\n", lineNum, extName);
                 return 0;
             }
             handleExtern(extName);
@@ -197,16 +187,13 @@ static int handleDirectiveLine(int dirType, char *rest, int hasLabel, const char
             int i = 0;
             int j = 0;
             while (rest[i] == ' ' || rest[i] == '\t') i++;
-            while (rest[i] && rest[i] != '\n' &&
-                   rest[i] != ' ' && rest[i] != '\t')
+            while (rest[i] && rest[i] != '\n' && rest[i] != ' ' && rest[i] != '\t')
                 entName[j++] = rest[i++];
             entName[j] = '\0';
 
             if (!isValidLabel(entName))
             {
-                fprintf(stderr,
-                        "Error line %d: invalid entry label '%s'\n",
-                        lineNum, entName);
+                fprintf(stderr, "Error line %d: invalid entry label '%s'\n", lineNum, entName);
                 return 0;
             }
             handleEntry(entName);
@@ -236,8 +223,7 @@ int analyzeRow(char *line, int lineNum)
     /* detect optional label (the word ends with ':') */
     i = skipWhiteChars(line, 0);
     j = 0;
-    while (line[i] != '\0' && line[i] != ':' &&
-           line[i] != ' '  && line[i] != '\t' && line[i] != '\n')
+    while (line[i] != '\0' && line[i] != ':' && line[i] != ' '  && line[i] != '\t' && line[i] != '\n')
     {
         if (j < MAX_LABEL_LEN - 1)
             label[j++] = line[i];
@@ -249,9 +235,7 @@ int analyzeRow(char *line, int lineNum)
     {
         if (!isValidLabel(label))
         {
-            fprintf(stderr,
-                    "Error line %d: invalid label name '%s'\n",
-                    lineNum, label);
+            fprintf(stderr, "Error line %d: invalid label name '%s'\n", lineNum, label);
             return 0;
         }
         hasLabel = 1;
@@ -262,17 +246,17 @@ int analyzeRow(char *line, int lineNum)
         i = skipWhiteChars(line, 0);
     }
 
+	/* read next word */
     i = readToken(line, i, command);
 
+	/* empty line */
     if (command[0] == '\0')
         return 1;
 
-    if (hasLabel &&
-        (strcmp(command, ".entry") == 0 || strcmp(command, ".extern") == 0))
+	/* .entry and .extern ignored if appear before directive */
+    if (hasLabel && (strcmp(command, ".entry") == 0 || strcmp(command, ".extern") == 0))
     {
-        fprintf(stderr,
-                "Warning line %d: label before '%s' is ignored\n",
-                lineNum, command);
+        fprintf(stderr, "Warning line %d: label before '%s' is ignored\n", lineNum, command);
         hasLabel = 0;
     }
 
@@ -282,19 +266,15 @@ int analyzeRow(char *line, int lineNum)
 
     if (dirType != DIR_NONE)
     {
-        return handleDirectiveLine(dirType, line + i,
-                                   hasLabel, label, lineNum);
+        return handleDirectiveLine(dirType, line + i, hasLabel, label, lineNum);
     }
 
     if (isCommandName(command))
     {
-        return handleInstruction(command, line + i,
-                                 hasLabel, label, lineNum);
+        return handleInstruction(command, line + i, hasLabel, label, lineNum);
     }
 
-    fprintf(stderr,
-            "Error line %d: unrecognized command '%s'\n",
-            lineNum, command);
+    fprintf(stderr, "Error line %d: unrecognized command '%s'\n", lineNum, command);
     return 0;
 }
 
