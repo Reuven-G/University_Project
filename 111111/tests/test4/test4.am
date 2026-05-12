@@ -1,0 +1,8 @@
+; test4
+.entry START
+.extern LIB
+    jsr LIB
+        mov r0, r1
+        stop
+NAME:   .string "Hi"
+NUM:    .data 7

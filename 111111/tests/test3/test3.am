@@ -1,0 +1,6 @@
+; test3.as
+.extern IO
+    prn IO
+        inc r3
+    prn IO
+        stop
