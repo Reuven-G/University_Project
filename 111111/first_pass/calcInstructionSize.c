@@ -1,32 +1,33 @@
 #include "calcInstructionSize.h"
 #include "../addressing/addressingType.h"
 
-
-
-
-/* the func calculates how much words in the memory the operand will take */
+/* The function calculates how many words in memory the instruction will occupy */
 int calcInstructionSize(int numOperands, int addrSrc, int addrDst)
 {
-    int L = 1; /* base word always present */
+    int L = 1; /* Base word is always present */
 
     if (numOperands == 0)
+    {
         return L;
+    }
 
     if (numOperands == 1)
     {
-        /* single operand is always the destination */
+        /* A single operand always takes exactly one extra word */
         L += 1;
         return L;
     }
 
+    /* For two operands: */
     if (addrSrc == REGISTER && addrDst == REGISTER)
     {
-        L += 1; /* both registers share one extra word */
+        /* Special case: both registers share a single extra word */
+        L += 1;
     }
     else
     {
-        L += 1; /* src word */
-        L += 1; /* dst word */
+        /* Each operand gets its own extra word */
+        L += 2;
     }
 
     return L;

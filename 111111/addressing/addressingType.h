@@ -16,5 +16,5 @@ int getAddressingType(char *operand);
 
 
 /* the func checks if it is a register */
-int isRegister(char *word)
+int isRegister(char *word);
 #endif

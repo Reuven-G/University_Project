@@ -18,13 +18,19 @@ this script is the most center of the whole program.
 /* the func checks the symbol table and add the final IC to every DATA_LABEL type */
 static void offsetDataSymbols(void)
 {
-    Symbol *sym = head;
+    Symbol *sym  = head;
     int finalIC  = getIC();
-
+ 
     while (sym != NULL)
     {
         if (sym->type == DATA_LABEL)
+        {
             sym->address += finalIC;
+        }
+        else if (sym->type == ENTRY_LABEL && sym->address < IC_START)
+        {
+            sym->address += finalIC;
+        }
         sym = sym->next;
     }
 }
@@ -37,7 +43,7 @@ static void resolveEntryLabels(void)
 {
     Symbol *ent = head;
     Symbol *def;
-
+ 
     while (ent != NULL)
     {
         if (ent->type == ENTRY_LABEL && ent->address == 0)
@@ -68,23 +74,21 @@ int runFirstPass(FILE *fp)
     char line[MAX_LINE_LEN];
     int  lineNum  = 0;
     int  hasError = 0;
-	
-	/* reads every line */
+ 
     while (fgets(line, MAX_LINE_LEN, fp) != NULL)
     {
         lineNum++;
-
-        /* skip blanks and comments */
+ 
         if (isEmptyLine(line) || isComment(line))
             continue;
-		/* analyze the line */
+ 
         if (!analyzeRow(line, lineNum))
             hasError = 1;
     }
-
+ 
     offsetDataSymbols();
     resolveEntryLabels();
-
+ 
     if (hasError)
     {
         fprintf(stderr, "First pass finished with errors.\n");

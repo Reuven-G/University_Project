@@ -81,31 +81,31 @@ static void writeWord(int word, char are)
 /* the encoder of the line of the command */
 static int encodeInstructionLine(const char *line, int lineNum)
 {
-    char  command[MAX_TOKEN_LEN];
-    char  operandBuf[MAX_TOKEN_LEN];
-    char  op1[MAX_TOKEN_LEN];
-    char  op2[MAX_TOKEN_LEN];
-    int   i = 0;
-    int   numOps;
-    int   addrSrc    = -1;
-    int   addrDst    = -1;
-    int   baseWord;
-    int   baseIndex;
-    int   currentAddr;
+    char         command[MAX_TOKEN_LEN];
+    char         operandBuf[MAX_TOKEN_LEN];
+    char         op1[MAX_TOKEN_LEN];
+    char         op2[MAX_TOKEN_LEN];
+    int          i = 0;
+    int          numOps;
+    int          addrSrc    = -1;
+    int          addrDst    = -1;
+    int          baseWord;
+    int          baseIndex;
+    int          currentAddr;
     Instruction *inst;
-
-	/* check command and find info */
+ 
     i = readToken(line, 0, command);
     if (command[0] == '\0') return 1;
+ 
     inst = findInstruction(command);
     if (inst == NULL) return 1;
-
-	/* analayze operands */
+ 
     i = skipWhiteChars(line, i);
     strncpy(operandBuf, line + i, MAX_TOKEN_LEN - 1);
     operandBuf[MAX_TOKEN_LEN - 1] = '\0';
+ 
     numOps = parseOperands(operandBuf, op1, op2);
-
+ 
     if (numOps == 2)
     {
         addrSrc = getAddressingType(op1);
@@ -115,19 +115,18 @@ static int encodeInstructionLine(const char *line, int lineNum)
     {
         addrDst = getAddressingType(op1);
     }
-
-    /* records the index of the word and writes it*/
-    baseIndex   = codeIndex;
-    baseWord    = encodeBaseWord(inst, addrSrc, addrDst);
-    currentAddr = IC_START + codeIndex;
+ 
+    baseIndex            = codeIndex;
+    baseWord             = encodeBaseWord(inst, addrSrc, addrDst);
+    currentAddr          = IC_START + codeIndex;
     codeImage[codeIndex] = baseWord;
     areImage[codeIndex]  = 'A';
     codeIndex++;
     currentAddr++;
-
+ 
     if (numOps == 0)
         return 1;
-
+ 
     if (numOps == 2)
     {
         if (addrSrc == REGISTER && addrDst == REGISTER)
@@ -137,85 +136,80 @@ static int encodeInstructionLine(const char *line, int lineNum)
             codeIndex++;
             return 1;
         }
-
+ 
         encodeOperand(op1, addrSrc, currentAddr, 1, codeImage, areImage, codeIndex, extRefs, &extCount);
         codeIndex++;
         currentAddr++;
-
+ 
         encodeOperand(op2, addrDst, currentAddr, 0, codeImage, areImage, codeIndex, extRefs, &extCount);
         codeIndex++;
     }
-    else
+    else /* numOps == 1 */
     {
         encodeOperand(op1, addrDst, currentAddr, 0, codeImage, areImage, codeIndex, extRefs, &extCount);
         codeIndex++;
     }
-
+ 
     (void)baseIndex;
     return 1;
 }
 
 
 
-
 /* second pass on the file */
 void runSecondPass(const char *baseName)
 {
-    char  amName[256];
-    FILE *fp;
-    char  line[MAX_LINE_LEN];
-    char  command[MAX_TOKEN_LEN];
-    int   lineNum  = 0;
-    int   hasError = 0;
-    int   labelEnd;
-    int  *dataImage;
-    int   dcSize;
-    int   icSize;
+    char    amName[256];
+    FILE   *fp;
+    char    line[MAX_LINE_LEN];
+    char    command[MAX_TOKEN_LEN];
+    int     lineNum  = 0;
+    int     hasError = 0;
+    int     labelEnd;
+    int    *dataImage;
+    int     dcSize;
+    int     icSize;
     Symbol *sym;
-
-    /* build .am */
+ 
     strncpy(amName, baseName, 251);
     amName[251] = '\0';
     strcat(amName, ".am");
-
+ 
     fp = fopen(amName, "r");
     if (fp == NULL)
     {
         fprintf(stderr, "Error: cannot open '%s' for second pass\n", amName);
         return;
     }
-
+ 
     codeIndex = 0;
     extCount  = 0;
-    memset(areImage, 'A', sizeof(areImage));
-
-	/* checks every line */
+ 
     while (fgets(line, MAX_LINE_LEN, fp) != NULL)
     {
         lineNum++;
-
+ 
         if (isEmptyLine(line) || isComment(line))
             continue;
-
-        /* start from the actual command*/
+ 
         labelEnd = skipLabelIndex(line);
         readToken(line, labelEnd, command);
+ 
         if (strcmp(command, ".entry")  == 0 || strcmp(command, ".extern") == 0 || strcmp(command, ".data")   == 0 || strcmp(command, ".string") == 0)
             continue;
-
-        /* encode as instruction */
+ 
         if (!encodeInstructionLine(line + labelEnd, lineNum))
             hasError = 1;
     }
-
+ 
     fclose(fp);
-
+ 
     if (hasError)
     {
         fprintf(stderr, "Second pass finished with errors.\n");
         return;
     }
-
+ 
     sym = head;
     while (sym != NULL)
     {
@@ -227,16 +221,14 @@ void runSecondPass(const char *baseName)
         sym = sym->next;
     }
     if (hasError) return;
-
-    /* write output files */
+ 
     icSize    = codeIndex;
     dataImage = getDataImage();
     dcSize    = getDC();
-
+ 
     writeObFile(baseName, codeImage, areImage, icSize, dataImage, dcSize);
     writeEntFile(baseName);
     writeExtFile(baseName, extRefs, extCount);
-
+ 
     printf("Done: %s  (IC=%d, DC=%d)\n", baseName, icSize, dcSize);
 }
-

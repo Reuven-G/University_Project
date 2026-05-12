@@ -5,9 +5,7 @@
 #include "utils/utils.h"
 
 /*
-	this script checks the .as file.
-	inside it the script finds the MACROS, saves them, translate them
-	and save everything in the .am file
+this script checks the .as file
 */
 
 
@@ -55,7 +53,7 @@ void addMacroLine(MacroTable *table, const char *line)
     MacroNode *node = table->head;
     if (node == NULL || node->lineCount >= MAX_MACRO_LINES)
         return;
-
+ 
     node->lines[node->lineCount] = (char *)malloc(strlen(line) + 1);
     if (node->lines[node->lineCount] == NULL)
     {
@@ -92,12 +90,11 @@ void freeMacroTable(MacroTable *table)
     MacroNode *current = table->head;
     MacroNode *temp;
     int i;
-
+ 
     while (current != NULL)
     {
         for (i = 0; i < current->lineCount; i++)
             free(current->lines[i]);
-
         temp = current;
         current = current->next;
         free(temp);
@@ -111,8 +108,11 @@ void freeMacroTable(MacroTable *table)
 /* checks if the line starts with "mcro" and with/without tab space after it */
 static int isMacroStart(const char *line)
 {
-    return (strncmp(line, "mcro", 4) == 0 &&
-            (line[4] == ' ' || line[4] == '\t'));
+    int i = 0;
+    while (line[i] == ' ' || line[i] == '\t') i++;
+    if (strncmp(line + i, "mcro", 4) != 0) return 0;
+    i += 4;
+    return (line[i] == ' ' || line[i] == '\t');
 }
 
 
@@ -122,9 +122,10 @@ static int isMacroStart(const char *line)
 static int isMacroEnd(const char *line)
 {
     int i = 0;
-    while (line[i] == ' ' || line[i] == '\t')
-        i++;
-    return (strncmp(line + i, "mcroend", 7) == 0);
+    while (line[i] == ' ' || line[i] == '\t') i++;
+    if (strncmp(line + i, "mcroend", 7) != 0) return 0;
+    i += 7;
+    return (line[i] == '\0' || line[i] == '\n' || line[i] == '\r' || line[i] == ' ' || line[i] == '\t');
 }
 
 
@@ -133,18 +134,55 @@ static int isMacroEnd(const char *line)
 /* extract and copy the macro name itself from the line */
 static void extractMacroName(const char *line, char *dest)
 {
-    int i = 4; /* skip "mcro" */
+    int i = 0;
     int j = 0;
-
-    while (line[i] == ' ' || line[i] == '\t')
-        i++;
-
-    while (line[i] != '\0' && line[i] != '\n' && line[i] != '\r' &&
-           line[i] != ' '  && line[i] != '\t')
-    {
+ 
+    while (line[i] == ' ' || line[i] == '\t') i++; /* skip whitespace */
+    
+    i += 4; /* skip "mcro" */
+    
+    while (line[i] == ' ' || line[i] == '\t') i++; /* skip whitespace between mcro and name */
+ 
+    while (line[i] != '\0' && line[i] != '\n' && line[i] != '\r' && line[i] != ' '  && line[i] != '\t')
         dest[j++] = line[i++];
-    }
+ 
     dest[j] = '\0';
+}
+
+
+
+
+/* get the first word that is not a label */
+static void getFirstNonLabelWord(const char *line, char *dest)
+{
+    char word[MAX_MACRO_NAME];
+    int  i = 0;
+    int  j;
+ 
+    dest[0] = '\0';
+ 
+    while (1)
+    {
+        /* skip whitespace */
+        while (line[i] == ' ' || line[i] == '\t') i++;
+        if (line[i] == '\0' || line[i] == '\n') break;
+ 
+        /* read one word */
+        j = 0;
+        while (line[i] != '\0' && line[i] != ' ' &&
+               line[i] != '\t' && line[i] != '\n')
+            word[j++] = line[i++];
+        word[j] = '\0';
+ 
+        /* if ends with ':' skip and continue */
+        if (j > 0 && word[j - 1] == ':')
+            continue;
+ 
+        /* found */
+        strncpy(dest, word, MAX_MACRO_NAME - 1);
+        dest[MAX_MACRO_NAME - 1] = '\0';
+        break;
+    }
 }
 
 
@@ -153,34 +191,34 @@ static void extractMacroName(const char *line, char *dest)
 /* that func evry line one after another and store the 'body' of the MACRO by checking when MACRO starts or ends */
 void runPreprocessor(FILE *asFile, FILE *amFile)
 {
-    char line[MAX_LINE_LENGTH];
-    char firstName[MAX_MACRO_NAME];
+    char       line[MAX_LINE_LENGTH];
+    char       firstName[MAX_MACRO_NAME];
     MacroNode *macro;
-    int insideMacro = 0;
+    int        insideMacro = 0;
     MacroTable *table = createMacroTable();
-
+    int        k;
+ 
     while (fgets(line, MAX_LINE_LENGTH, asFile))
     {
-        /* skip white-space in the start */
         if (isComment(line) || isEmptyLine(line))
         {
             if (!insideMacro)
                 fputs(line, amFile);
             continue;
         }
-
+ 
         if (isMacroEnd(line))
         {
             insideMacro = 0;
             continue;
         }
-
+ 
         if (insideMacro)
         {
             addMacroLine(table, line);
             continue;
         }
-
+ 
         if (isMacroStart(line))
         {
             extractMacroName(line, firstName);
@@ -188,22 +226,22 @@ void runPreprocessor(FILE *asFile, FILE *amFile)
             insideMacro = 1;
             continue;
         }
-
-        /* check if the line is a macro */
-        get_first_word(line, firstName);
+ 
+        /* check if the line have macro call */
+        getFirstNonLabelWord(line, firstName);
         macro = findMacro(table, firstName);
-
+ 
         if (macro != NULL)
         {
-            int i;
-            for (i = 0; i < macro->lineCount; i++)
-                fputs(macro->lines[i], amFile);
+            /* Expand the macro: write all body lines to .am */
+            for (k = 0; k < macro->lineCount; k++)
+                fputs(macro->lines[k], amFile);
         }
         else
         {
             fputs(line, amFile);
         }
     }
-
+ 
     freeMacroTable(table);
 }
